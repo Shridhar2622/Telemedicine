@@ -75,7 +75,9 @@ function Signuppage() {
       // success
       // If backend also returns token you could optionally save token here.
       // For signup we redirect to login (common flow)
-      navigate("/login");
+      localStorage.setItem("pendingEmail", email);
+      navigate("/verifyemail");
+
     } catch (err) {
       console.error("Signup error:", err);
       setLoading(false);
