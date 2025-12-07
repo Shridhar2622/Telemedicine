@@ -132,10 +132,8 @@ function VerifyEmail() {
           onChange={(e) => setOtp(e.target.value)}
         />
 
-        {error.otp && <p className="text-red-500 text-sm">{error.otp}</p>}
-
         <Button value={loading ? "Verifying..." : "Verify OTP"} disabled={loading} />
-
+        {error.otp && <p className="text-red-500 text-sm">{error.otp}</p>}
         {backendError && <p className="text-red-500 text-sm">{backendError}</p>}
 
         <p className="text-sm text-gray-500">

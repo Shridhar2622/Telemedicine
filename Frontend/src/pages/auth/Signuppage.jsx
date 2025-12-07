@@ -6,10 +6,15 @@ function Signuppage() {
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("Patient"); // Default role
 
   // UI states
   const [loading, setLoading] = useState(false);
-  const [fieldError, setFieldError] = useState({ userName: "", email: "", password: "" });
+  const [fieldError, setFieldError] = useState({
+    userName: "",
+    email: "",
+    password: "",
+  });
   const [backendError, setBackendError] = useState("");
 
   const navigate = useNavigate();
@@ -51,7 +56,6 @@ function Signuppage() {
     e.preventDefault();
     setBackendError("");
 
-    // frontend validation
     if (!validateFields()) return;
 
     setLoading(true);
@@ -60,24 +64,26 @@ function Signuppage() {
       const res = await fetch("http://localhost:3000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userName: userName.trim(), email: email.trim(), password }),
+        body: JSON.stringify({
+          userName: userName.trim(),
+          email: email.trim(),
+          password,
+          role,
+        }),
       });
 
       const data = await res.json();
       setLoading(false);
 
       if (!res.ok) {
-        // backend provided message -> show to user
         setBackendError(data.message || "Registration failed. Try again.");
         return;
       }
 
-      // success
-      // If backend also returns token you could optionally save token here.
-      // For signup we redirect to login (common flow)
+      // Save email for OTP page
       localStorage.setItem("pendingEmail", email);
-      navigate("/verifyemail");
 
+      navigate("/verifyemail");
     } catch (err) {
       console.error("Signup error:", err);
       setLoading(false);
@@ -98,6 +104,7 @@ function Signuppage() {
       {/* RIGHT FORM SECTION */}
       <div className="flex flex-1 items-center justify-center">
         <div className="w-80 md:w-96 flex flex-col gap-6">
+
           {/* Header */}
           <div>
             <h2 className="text-4xl font-bold">Sign Up</h2>
@@ -114,48 +121,103 @@ function Signuppage() {
 
           {/* FORM */}
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            
+            {/* Username */}
             <div className="flex flex-col gap-1">
               <label className="font-medium">UserName</label>
               <input
-                className={`border rounded-md h-10 px-3 text-[16px] ${fieldError.userName ? "border-red-500" : "border-gray-400"}`}
+                className={`border rounded-md h-10 px-3 text-[16px] ${
+                  fieldError.userName ? "border-red-500" : "border-gray-400"
+                }`}
                 type="text"
                 placeholder="Enter username"
                 onChange={(e) => setUserName(e.target.value)}
                 value={userName}
               />
-              {fieldError.userName && <p className="text-[13px] text-red-500">{fieldError.userName}</p>}
+              {fieldError.userName && (
+                <p className="text-[13px] text-red-500">
+                  {fieldError.userName}
+                </p>
+              )}
             </div>
 
+            {/* Email */}
             <div className="flex flex-col gap-1">
               <label className="font-medium">Email</label>
               <input
-                className={`border rounded-md h-10 px-3 text-[16px] ${fieldError.email ? "border-red-500" : "border-gray-400"}`}
+                className={`border rounded-md h-10 px-3 text-[16px] ${
+                  fieldError.email ? "border-red-500" : "border-gray-400"
+                }`}
                 type="email"
                 placeholder="Enter email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              {fieldError.email && <p className="text-[13px] text-red-500">{fieldError.email}</p>}
+              {fieldError.email && (
+                <p className="text-[13px] text-red-500">
+                  {fieldError.email}
+                </p>
+              )}
             </div>
 
+            {/* Password */}
             <div className="flex flex-col gap-1">
               <label className="font-medium">Password</label>
               <input
-                className={`border rounded-md h-10 px-3 text-[16px] ${fieldError.password ? "border-red-500" : "border-gray-400"}`}
+                className={`border rounded-md h-10 px-3 text-[16px] ${
+                  fieldError.password ? "border-red-500" : "border-gray-400"
+                }`}
                 type="password"
                 placeholder="Enter password"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
               />
-              {fieldError.password && <p className="text-[13px] text-red-500">{fieldError.password}</p>}
+              {fieldError.password && (
+                <p className="text-[13px] text-red-500">
+                  {fieldError.password}
+                </p>
+              )}
             </div>
 
+            {/* ROLE SELECTOR */}
+            <div className="flex flex-col gap-2">
+              <label className="font-medium">Select Role</label>
+
+              <div className="flex gap-3">
+                {["Patient", "Doctor"].map((item) => (
+                  <button
+                    type="button"
+                    key={item}
+                    className={`px-4 py-2 rounded-xl border transition-all 
+                      ${
+                        role === item
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "bg-white text-gray-600 border-gray-300"
+                      }
+                    `}
+                    onClick={() => setRole(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Submit */}
             <div className="pt-3">
-              <Button value={loading ? "Creating account..." : "Create account"} type="submit" disabled={loading} />
+              <Button
+                value={loading ? "Creating account..." : "Create account"}
+                type="submit"
+                disabled={loading}
+              />
             </div>
 
-            {/* backend error */}
-            {backendError && <p className="text-[13px] text-red-500 text-center">{backendError}</p>}
+            {/* Backend error */}
+            {backendError && (
+              <p className="text-[13px] text-red-500 text-center">
+                {backendError}
+              </p>
+            )}
           </form>
         </div>
       </div>

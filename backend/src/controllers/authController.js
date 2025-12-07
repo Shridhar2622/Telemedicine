@@ -9,7 +9,7 @@ const sendEmail=require("../services/emailService")
 //register user
 async function registerUser(req,res){
     try{
-    const {userName,email,password}=req.body
+    const {userName,email,password,role}=req.body
 
     if(!userName || !email || !password)
     {
@@ -38,7 +38,8 @@ async function registerUser(req,res){
     const newUser=await User.create({
         userName,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        role
     })
 
     //create the token so keep the user loged in
@@ -179,19 +180,17 @@ async function verifyOTP(req,res){
         const isExpired=Date.now();
         if(user.emailVerificationExpires < isExpired)
         {
-            return res.json({
-                message: "otp is expired"
-            })
+            return res.status(400).json({ message: "otp is expired" });
         }
         if(user.emailVerificationOTP.toString()!==otp)
         {
              
-            return res.json({
-                message: "please enter valid OTP"
-            })
+          return res.status(400).json({ message: "please enter valid OTP" });
         
         }
         user.isEmailVerified=true;
+        user.emailVerificationOTP=null;
+        user.emailVerificationExpires=null;
         await user.save()
         //send a email saying your email is verified
         sendEmail(email,"verification status",`<p>Your email is verified. Enjoy our service </p>`)
