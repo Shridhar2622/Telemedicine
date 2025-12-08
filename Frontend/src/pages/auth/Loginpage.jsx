@@ -45,7 +45,7 @@ function Loginpage() {
       const res = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ email, password }),
       });
@@ -70,7 +70,7 @@ function Loginpage() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // ⭐ REDIRECT based on role
-      if (role === "Patient") navigate("/patient/homepage");
+      if (role === "Patient") navigate("/user/homepage");
       if (role === "Doctor") navigate("/doctor/homepage");
 
     } catch (error) {
