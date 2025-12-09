@@ -2,6 +2,7 @@ const express=require("express")
 const dotenv=require("dotenv")
 const userRoute=require("./routes/userRoutes")
 const authRoute=require("./routes/authRoutes")
+const doctorRoute=require("./routes/doctorRoutes")
 const cors=require("cors")  
 dotenv.config({path: "../.env"})
 const DB=require("./config/db")
@@ -19,6 +20,9 @@ app.use("/api/auth",authRoute)
 
 //user routes handle here
 app.use("/api/user",userRoute)
+
+//doctor routes handle here
+app.use("/api/doctor",doctorRoute)
 
 
 app.listen(PORT,()=>{
