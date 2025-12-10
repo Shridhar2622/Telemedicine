@@ -1,6 +1,12 @@
 import { useState } from "react";
 import Button from "../../components/Button";
+import GoogleLoginButton from "../../components/GoogleLoginButton";
 import { useNavigate } from "react-router-dom";
+import CardSwap, { Card } from "../../components/ui/CardSwap"
+import doctor1 from "../../assets/doctor1.jpg";
+import doctor2 from "../../assets/doctor2.jpg";
+import doctor3 from "../../assets/doctor3.jpg";
+import "./LoginPage.css";
 
 function Loginpage() {
   const [email, setEmail] = useState("");
@@ -81,87 +87,95 @@ function Loginpage() {
   };
 
   return (
-    <div className="h-screen w-full flex">
+    <div className="login-container">
 
       {/* LEFT POSTER SECTION */}
-      <div className="hidden md:flex flex-1 bg-indigo-600 text-white items-center justify-center">
-        <h1 className="text-5xl font-bold px-10 leading-tight">
-          Your Health,
-          <br /> Your Control.
-        </h1>
+      <div className="login-showcase">
+        <div className="showcase-content floating">
+
+          <CardSwap
+            cardDistance={60}
+            verticalDistance={70}
+            delay={5000}
+            pauseOnHover={false}
+          >
+
+            <Card>
+              <img src={doctor1} alt="Professional Doctor" />
+            </Card>
+            <Card>
+              <img src={doctor2} alt="Medical Professional" />
+            </Card>
+            <Card>
+              <img src={doctor3} alt="Healthcare Expert" />
+            </Card>
+
+          </CardSwap>
+        </div>
       </div>
 
       {/* RIGHT FORM SECTION */}
-      <div className="flex flex-1 items-center justify-center">
-        <div className="w-80 md:w-96 flex flex-col gap-6">
+      <div className="login-form-section">
+        <div className="login-form-container">
 
           {/* Header */}
-          <div>
-            <h2 className="text-4xl font-bold">Log-in</h2>
-            <h4 className="text-gray-500 text-sm">
-              Are you new??{" "}
-              <span
-                className="text-indigo-600 font-semibold underline cursor-pointer"
+          <div className="login-header">
+            <h2 className="login-title">Welcome Back</h2>
+            <h4 className="login-subtitle">
+              New to our platform?{" "}
+              <a
+                href="#"
+                className="signup-link"
                 onClick={() => navigate("/signup")}
               >
-                Sign-up
-              </span>
+                Create Account
+              </a>
             </h4>
           </div>
 
           {/* FORM */}
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form className="login-form" onSubmit={handleSubmit}>
 
             {/* Email */}
-            <div className="flex flex-col gap-1">
-              <label className="font-medium">Email</label>
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
               <input
-                className={`border ${
-                  fieldError.email ? "border-red-500" : "border-gray-400"
-                } rounded-md h-10 px-3 text-[16px]`}
+                className={`form-input ${fieldError.email ? "error" : ""}`}
                 type="email"
-                placeholder="Enter email"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
               {fieldError.email && (
-                <p className="text-[13px] text-red-500">{fieldError.email}</p>
+                <p className="error-message">⚠️ {fieldError.email}</p>
               )}
             </div>
 
             {/* Password */}
-            <div className="flex flex-col gap-1">
-              <label className="font-medium">Password</label>
+            <div className="form-group">
+              <label className="form-label">Password</label>
               <input
-                className={`border ${
-                  fieldError.password ? "border-red-500" : "border-gray-400"
-                } rounded-md h-10 px-3 text-[16px]`}
+                className={`form-input ${fieldError.password ? "error" : ""}`}
                 type="password"
-                placeholder="Enter password"
+                placeholder="Enter your password"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
               />
               {fieldError.password && (
-                <p className="text-[13px] text-red-500">{fieldError.password}</p>
+                <p className="error-message">⚠️ {fieldError.password}</p>
               )}
             </div>
 
             {/* ROLE SELECTOR */}
-            <div className="flex flex-col gap-2">
-              <label className="font-medium">Select Role</label>
+            <div className="role-selector">
+              <label className="form-label">Login As</label>
 
-              <div className="flex gap-3">
+              <div className="role-buttons">
                 {["Patient", "Doctor"].map((item) => (
                   <button
                     type="button"
                     key={item}
-                    className={`px-4 py-2 rounded-xl border transition-all 
-                      ${
-                        role === item
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-white text-gray-600 border-gray-300"
-                      }
-                    `}
+                    className={`role-button ${role === item ? "active" : ""}`}
                     onClick={() => setRole(item)}
                   >
                     {item}
@@ -171,17 +185,33 @@ function Loginpage() {
             </div>
 
             {/* Submit */}
-            <div className="pt-3">
-              <Button
-                value={loading ? "Logging in..." : "Login"}
+            <div className="submit-section">
+              <button
+                type="submit"
+                className="login-button"
                 disabled={loading}
-              />
+              >
+                {loading && <span className="loading-spinner"></span>}
+                {loading ? "Signing In..." : "Sign In"}
+              </button>
             </div>
 
             {/* Backend error */}
             {backendError && (
-              <p className="text-[13px] text-red-500">{backendError}</p>
+              <div className="backend-error">
+                ⚠️ {backendError}
+              </div>
             )}
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 border-t border-gray-300"></div>
+              <span className="text-gray-500 text-sm">OR</span>
+              <div className="flex-1 border-t border-gray-300"></div>
+            </div>
+
+            {/* Google Login Button */}
+            <GoogleLoginButton />
           </form>
         </div>
       </div>

@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
+import CardSwap, { Card } from "../../components/ui/CardSwap"
+import doctor1 from "../../assets/doctor1.jpg";
+import doctor2 from "../../assets/doctor2.jpg";
+import doctor3 from "../../assets/doctor3.jpg";
+
 
 function Signuppage() {
   const [userName, setUserName] = useState("");
@@ -94,12 +99,32 @@ function Signuppage() {
   return (
     <div className="h-screen w-full flex">
       {/* LEFT POSTER SECTION */}
-      <div className="hidden md:flex flex-1 bg-indigo-600 text-white items-center justify-center">
-        <h1 className="text-5xl font-bold px-10 leading-tight">
-          Your Health,
-          <br /> Your Control.
-        </h1>
+        <div className="hidden md:flex flex-1 bg-indigo-500 items-center justify-center">
+        <div className="relative h-[700px] w-full overflow-hidden">
+
+    <CardSwap
+      cardDistance={60}
+      verticalDistance={70}
+      delay={5000}
+      pauseOnHover={false}
+    >
+
+    <Card>
+      <img src={doctor1} alt="" />
+    </Card>
+    <Card>
+ 
+      <img src={doctor2} alt="" />
+    </Card>
+    <Card>
+
+      <img src={doctor3} alt="" />
+    </Card>
+
+    </CardSwap>
+  </div>
       </div>
+
 
       {/* RIGHT FORM SECTION */}
       <div className="flex flex-1 items-center justify-center">

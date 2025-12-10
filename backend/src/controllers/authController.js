@@ -210,4 +210,34 @@ async function verifyOTP(req,res){
 }
 
 
-module.exports={registerUser,login,verifyEmail,verifyOTP}
+// Google OAuth Success Handler
+async function googleAuthSuccess(req, res) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication failed",
+      });
+    }
+
+    // Generate token for the user
+    const token = generateToken(req.user);
+
+    // Redirect to frontend with token and user data
+    const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
+    
+    // Send token and user info as query params or use cookies
+    res.redirect(`${frontendURL}/auth/google/success?token=${token}&userId=${req.user._id}&role=${req.user.role}`);
+  } catch (error) {
+    console.log(error);
+    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/login?error=auth_failed`);
+  }
+}
+
+// Google OAuth Failure Handler
+async function googleAuthFailure(req, res) {
+  res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/login?error=auth_failed`);
+}
+
+
+module.exports={registerUser,login,verifyEmail,verifyOTP, googleAuthSuccess, googleAuthFailure}
