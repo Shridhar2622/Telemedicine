@@ -6,6 +6,7 @@ const generateToken=require('../utils/generateToken')
 const sendEmail=require("../services/emailService")
 
 
+
 //register user
 async function registerUser(req,res){
     try{
@@ -210,4 +211,104 @@ async function verifyOTP(req,res){
 }
 
 
-module.exports={registerUser,login,verifyEmail,verifyOTP}
+//forgot password
+async function forgetPassword(req, res){
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const OTP = generateOTP();
+
+    user.emailVerificationOTP = OTP;
+    user.emailVerificationExpires = Date.now() + 1000 * 60 * 5; // 5 min
+
+    await user.save();
+
+    await sendEmail(
+      email,
+      "Reset Your Password",
+      `<h3>Your OTP is: ${OTP}</h3>`
+    );
+
+    return res.status(200).json({
+      message: "OTP sent to your email",
+    });
+
+  } catch (error) {
+    console.log("Forgot Password Error:", error);
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+
+//verify otp for forgot password
+async function verifyForgotPasswordOtp (req, res) {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // ✅ OTP match check
+    if (user.emailVerificationOTP.toString() !== otp) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    // ✅ OTP expiry check
+    if (user.emailVerificationExpires < Date.now()) {
+      return res.status(400).json({
+        message: "OTP expired",
+      });
+    }
+
+    // ✅ Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    user.emailVerificationOTP = null;
+    user.emailVerificationExpires = null;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Password reset successful",
+    });
+
+  } catch (error) {
+    console.log("Verify OTP Error:", error);
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+module.exports={registerUser,login,verifyEmail,verifyOTP,forgetPassword,verifyForgotPasswordOtp}

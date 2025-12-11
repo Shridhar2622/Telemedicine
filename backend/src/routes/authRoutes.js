@@ -1,5 +1,6 @@
 const express=require('express');
-const {login,registerUser,verifyEmail,verifyOTP}=require('../controllers/authController')
+const {login,registerUser,verifyEmail,verifyOTP,forgetPassword,verifyForgotPasswordOtp}=require('../controllers/authController');
+
 const route=express.Router()
 
 
@@ -14,6 +15,12 @@ route.post("/verifyEmail",verifyEmail)
 
 //verify your OTP
 route.post("/verifyOTP",verifyOTP)
+
+
+//forgot password
+route.post("/forgotPassword", forgetPassword);
+route.post("/forgotPassword/verifyOTP", verifyForgotPasswordOtp);
+
 
 
 module.exports=route

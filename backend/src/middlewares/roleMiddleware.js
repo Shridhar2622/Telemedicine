@@ -15,7 +15,7 @@
             
         } catch (e) {
             console.log(e)
-            return res.status(200).json({
+            return res.status(500).json({
                 message: "server error"
             })
         
@@ -23,7 +23,7 @@
     }
 
 
-
+//doctore role middleware
 
 
     module.exports={patientRoleMiddleware}

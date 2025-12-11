@@ -15,6 +15,6 @@ route.get("/homepage",authMiddleware,patientRoleMiddleware,viewProfile);
 
 
 //view ur prescription
-route.get(`/prescription`,authMiddleware,getPrescription)
+route.get("/prescription",authMiddleware,getPrescription)
 
 module.exports=route

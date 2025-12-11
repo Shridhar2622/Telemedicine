@@ -2,6 +2,8 @@ const express=require("express")
 const dotenv=require("dotenv")
 const userRoute=require("./routes/userRoutes")
 const authRoute=require("./routes/authRoutes")
+const doctorRoute=require("./routes/doctorRoutes")
+const appointmentRoute=require("./routes/appointmentRouter")
 const cors=require("cors")  
 dotenv.config({path: "../.env"})
 const DB=require("./config/db")
@@ -20,6 +22,12 @@ app.use("/api/auth",authRoute)
 //user routes handle here
 app.use("/api/user",userRoute)
 
+//doctor routes handle here
+app.use("/api/doctor",doctorRoute)
+
+
+//Appointment routes handle here
+app.use("/api/user/appointment",appointmentRoute)
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT} 🚀`)
