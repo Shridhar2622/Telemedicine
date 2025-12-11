@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 
 export default function ProfileMenu({avtar}) {
+  let name=avtar
   const [menu, setMenu] = useState(false);
   const menuRef = useRef(null);
 
@@ -23,7 +24,7 @@ export default function ProfileMenu({avtar}) {
         onClick={() => setMenu((prev) => !prev)}
         className="w-10 h-10 rounded-full bg-white border-2 border-gray-300 cursor-pointer flex items-center justify-center hover:shadow-md transition"
       >
-        <span className="font-semibold text-gray-700">{avtar}</span>
+        <span className="font-semibold  text-gray-700">{name.toUpperCase()}</span>
       </div>
 
       {/* Dropdown */}
@@ -31,7 +32,7 @@ export default function ProfileMenu({avtar}) {
         <div className="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border overflow-hidden animate-fade-in">
           <MenuItem text="Prescriptions" />
           <MenuItem text="View History" />
-          <MenuItem text="Theme" />
+          <MenuItem text="Change Password" />
           <div className="border-t">
             <MenuItem text="Logout" danger />
           </div>

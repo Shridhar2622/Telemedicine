@@ -45,7 +45,7 @@ function Loginpage() {
       const res = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -72,7 +72,6 @@ function Loginpage() {
       // ⭐ REDIRECT based on role
       if (role === "Patient") navigate("/user/homepage");
       if (role === "Doctor") navigate("/doctor/homepage");
-
     } catch (error) {
       console.log("Login error:", error);
       setBackendError("Server error. Please try again later.");
@@ -82,7 +81,6 @@ function Loginpage() {
 
   return (
     <div className="h-screen w-full flex">
-
       {/* LEFT POSTER SECTION */}
       <div className="hidden md:flex flex-1 bg-indigo-600 text-white items-center justify-center">
         <h1 className="text-5xl font-bold px-10 leading-tight">
@@ -94,7 +92,6 @@ function Loginpage() {
       {/* RIGHT FORM SECTION */}
       <div className="flex flex-1 items-center justify-center">
         <div className="w-80 md:w-96 flex flex-col gap-6">
-
           {/* Header */}
           <div>
             <h2 className="text-4xl font-bold">Log-in</h2>
@@ -111,7 +108,6 @@ function Loginpage() {
 
           {/* FORM */}
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-
             {/* Email */}
             <div className="flex flex-col gap-1">
               <label className="font-medium">Email</label>
@@ -142,8 +138,19 @@ function Loginpage() {
                 value={password}
               />
               {fieldError.password && (
-                <p className="text-[13px] text-red-500">{fieldError.password}</p>
+                <p className="text-[13px] text-red-500">
+                  {fieldError.password}
+                </p>
               )}
+            </div>
+            {/* Forgot Password */}
+            <div className="flex justify-end">
+              <span
+                className="text-sm text-indigo-600 font-medium cursor-pointer hover:underline transition-all"
+                onClick={() => navigate("/forgotPassword")}
+              >
+                Forgot Password?
+              </span>
             </div>
 
             {/* ROLE SELECTOR */}
