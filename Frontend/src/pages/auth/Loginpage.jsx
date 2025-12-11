@@ -51,7 +51,7 @@ function Loginpage() {
       const res = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -78,7 +78,6 @@ function Loginpage() {
       // ⭐ REDIRECT based on role
       if (role === "Patient") navigate("/user/homepage");
       if (role === "Doctor") navigate("/doctor/homepage");
-
     } catch (error) {
       console.log("Login error:", error);
       setBackendError("Server error. Please try again later.");
@@ -164,6 +163,15 @@ function Loginpage() {
               {fieldError.password && (
                 <p className="error-message">⚠️ {fieldError.password}</p>
               )}
+            </div>
+            {/* Forgot Password */}
+            <div className="flex justify-end">
+              <span
+                className="text-sm text-indigo-600 font-medium cursor-pointer hover:underline transition-all"
+                onClick={() => navigate("/forgotPassword")}
+              >
+                Forgot Password?
+              </span>
             </div>
 
             {/* ROLE SELECTOR */}
