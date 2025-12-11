@@ -2,8 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Signuppage from "./pages/auth/Signuppage.jsx";
 import Loginpage from "./pages/auth/Loginpage.jsx";
 import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
-import PatientPage from "./pages/homepage/patientPage.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
+import GoogleAuthSuccess from "./pages/auth/GoogleAuthSuccess.jsx";
+import PatientPage from "./pages/homepage/PatientPage.jsx";
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
       <Route path="/login" element={<Loginpage />} />
       <Route path="/verifyemail" element={<VerifyEmail />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
-      <Route path="/user/homepage" element={<PatientPage />}/>
+      <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
+      <Route path="/patient/homepage" element={<PatientPage />} />
     </Routes>
   );
 }
