@@ -10,7 +10,7 @@ const appointmentSchema = new mongoose.Schema(
 
     doctor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Doctor",
       required: true
     },
 
@@ -18,11 +18,18 @@ const appointmentSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+timeSlot: {
+  start: {
+    type: String, // "14:00"
+    required: true
+  },
+  end: {
+    type: String, // "14:30"
+    required: true
+  }
+}
 
-    timeSlot: {
-      type: String,
-      required: true
-    },
+,
 
     status: {
       type: String,
@@ -37,6 +44,5 @@ const appointmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Appointment = mongoose.model("Appointment", appointmentSchema);
+module.exports = mongoose.model("Appointment", appointmentSchema);
 
-export default Appointment;

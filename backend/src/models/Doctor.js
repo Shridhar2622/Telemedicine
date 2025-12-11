@@ -1,6 +1,10 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const doctorSchema = new mongoose.Schema({
+  name:{
+    type:String,
+    required: true
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -40,10 +44,30 @@ const doctorSchema = new mongoose.Schema({
     {
       day: {
         type: String,
-        enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        enum: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ],
+        required: true,
       },
-      startTime: String,
-      endTime: String,
+
+      slots: [
+        {
+          startTime: {
+            type: String,
+            required: true,
+          },
+          endTime: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
     },
   ],
   rating: {
@@ -64,6 +88,6 @@ const doctorSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-})
+});
 
-module.exports = mongoose.model("Doctor", doctorSchema)
+module.exports = mongoose.model("Doctor", doctorSchema);

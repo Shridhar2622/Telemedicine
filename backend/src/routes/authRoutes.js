@@ -1,6 +1,6 @@
 const express=require('express');
-const {login,registerUser,verifyEmail,verifyOTP, googleAuthSuccess, googleAuthFailure}=require('../controllers/authController')
-const passport = require("passport");
+const {login,registerUser,verifyEmail,verifyOTP,forgetPassword,verifyForgotPasswordOtp}=require('../controllers/authController');
+
 const route=express.Router()
 
 
@@ -35,6 +35,12 @@ route.get(
 );
 
 route.get("/google/failure", googleAuthFailure);
+
+
+//forgot password
+route.post("/forgotPassword", forgetPassword);
+route.post("/forgotPassword/verifyOTP", verifyForgotPasswordOtp);
+
 
 
 module.exports=route
