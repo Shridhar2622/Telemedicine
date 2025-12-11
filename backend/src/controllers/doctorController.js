@@ -24,10 +24,11 @@ const createOrUpdateDoctorProfile = async (req, res) => {
       consultationFee,
       availableTimes,
       bio,
+      name
     } = req.body;
 
     // Validation
-    if (!specialization || !qualification || experience === undefined || !consultationFee) {
+    if (!specialization || !qualification || experience === undefined || !consultationFee || !name) {
       return res.status(400).json({
         success: false,
         message: "Please provide all required fields: specialization, qualification, experience, and consultationFee",
@@ -56,6 +57,7 @@ const createOrUpdateDoctorProfile = async (req, res) => {
     } else {
       // Create new profile
       doctor = await Doctor.create({
+        name,
         userId,
         specialization,
         qualification,

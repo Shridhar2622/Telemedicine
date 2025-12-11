@@ -6,6 +6,7 @@ dotenv.config({path: "../.env"})
 const userRoute=require("./routes/userRoutes")
 const authRoute=require("./routes/authRoutes")
 const doctorRoute=require("./routes/doctorRoutes")
+const appointmentRoute=require("./routes/appointmentRouter")
 const passport=require("./config/passport")
 const session=require("express-session")
 const cors=require("cors")  
@@ -50,6 +51,9 @@ app.use("/api/user",userRoute)
 //doctor routes handle here
 app.use("/api/doctor",doctorRoute)
 
+
+//Appointment routes handle here
+app.use("/api/user/appointment",appointmentRoute)
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT} 🚀`)
