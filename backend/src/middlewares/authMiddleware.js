@@ -1,38 +1,41 @@
-const jwt=require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 
-async function authMiddleware(req,res,next){
-    try {
+async function authMiddleware(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
 
-        //get the token from header
-        const authHeader=req.headers.authorization
-        //check if it is present or not
-        if(!authHeader || !authHeader.startsWith("Bearer "))
-        {
-            return res.status(401).json({
-                message: "You are not authorized to this page"
-            })
-        }
-
-        //get the token from the aray
-        const token=authHeader.split(" ")[1];
-
-        //verify token
-        const decoded=jwt.verify(token,process.env.SECRET_KEY)
-
-
-        //store the data in req object named as user
-        req.user=decoded
-        next()
-        
-    } catch (e) {
-        console.log(e)
-        res.status(503).json({
-            message: "Servor issue"
-        })
-        
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Unauthorized: Missing or invalid token",
+      });
     }
-    
+
+    const token = authHeader.split(" ")[1];
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.SECRET_KEY);
+    } catch (err) {
+      return res.status(401).json({
+        message: "Invalid or expired token",
+      });
+    }
+
+    // Attach decoded user to request
+    req.user = decoded;
+
+    // Block inactive users
+    if (decoded.isActive === false) {
+      return res.status(403).json({
+        message: "Your account is blocked. Contact admin.",
+      });
+    }
+
+    next();
+  } catch (err) {
+    console.log("Auth Middleware Error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
 }
 
-
-module.exports= authMiddleware
+module.exports = authMiddleware;

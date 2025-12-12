@@ -1,32 +1,27 @@
-const mongoose=require('mongoose')
+const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema(
   {
-    roomId: {
-      type: String,
-      required: true,
-    },
-
     sender: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: true,
     },
-
     receiver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: true,
     },
-
-    text: {
+    content: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
+    read: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
 
-const Message = mongoose.model("Message", messageSchema);
-
-export default Message;
+module.exports = mongoose.model("Message", messageSchema);

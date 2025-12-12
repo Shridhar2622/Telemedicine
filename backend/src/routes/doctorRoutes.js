@@ -1,27 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
+const { doctorRoleMiddleware } = require("../middlewares/roleMiddleware");
+
 const {
   createOrUpdateDoctorProfile,
   getDoctorProfile,
   getDoctorById,
   getAllDoctors,
   checkProfileStatus,
+  updateDoctorSchedule,
 } = require("../controllers/doctorController");
 
-// Check if profile is completed (must be authenticated)
-router.get("/profile/status", authMiddleware, checkProfileStatus);
 
-// Create or update doctor profile (must be authenticated)
-router.post("/profile", authMiddleware, createOrUpdateDoctorProfile);
+router.get("/profile/status", authMiddleware, doctorRoleMiddleware, checkProfileStatus);
 
-// Get logged-in doctor's profile (must be authenticated)
-router.get("/profile", authMiddleware, getDoctorProfile);
+router.post("/profile", authMiddleware, doctorRoleMiddleware, createOrUpdateDoctorProfile);
 
-// Get all doctors (public)
+router.put("/schedule", authMiddleware, doctorRoleMiddleware, updateDoctorSchedule);
+
+router.get("/profile", authMiddleware, doctorRoleMiddleware, getDoctorProfile);
+
 router.get("/", getAllDoctors);
 
-// Get doctor by ID (public)
 router.get("/:id", getDoctorById);
 
 module.exports = router;

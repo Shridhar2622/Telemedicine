@@ -1,16 +1,36 @@
-const express=require("express")
-const route=express.Router()
-const {bookAppointment,viewAppointment}=require("../controllers/appointmentController")
-const authMiddleware=require('../middlewares/authMiddleware')
-const {patientRoleMiddleware}=require('../middlewares/roleMiddleware')
+const express = require("express");
+const route = express.Router();
 
-//Book appointment
-route.post("/bookAppointment",authMiddleware,bookAppointment)
+const {
+  bookAppointment,
+  viewAppointment,
+  doctorViewAppointments,
+  updateAppointmentStatus,
+  cancelAppointment
+} = require("../controllers/appointmentController");
+
+const authMiddleware = require("../middlewares/authMiddleware");
+const { patientRoleMiddleware, doctorRoleMiddleware } = require("../middlewares/roleMiddleware");
 
 
-//patient can view his appointments
-route.get("/viewAppointment",authMiddleware,viewAppointment);
+// 📌 PATIENT — BOOK APPOINTMENT
+route.post("/book", authMiddleware, patientRoleMiddleware, bookAppointment);
 
 
+// 📌 PATIENT — VIEW THEIR APPOINTMENTS
+route.get("/my", authMiddleware, patientRoleMiddleware, viewAppointment);
 
-module.exports=route
+
+// 📌 DOCTOR — VIEW THEIR APPOINTMENTS
+route.get("/doctor", authMiddleware, doctorRoleMiddleware, doctorViewAppointments);
+
+
+// 📌 DOCTOR — ACCEPT / REJECT APPOINTMENTS
+route.patch("/status", authMiddleware, doctorRoleMiddleware, updateAppointmentStatus);
+
+
+// 📌 PATIENT — CANCEL APPOINTMENT
+route.delete("/cancel", authMiddleware, patientRoleMiddleware, cancelAppointment);
+
+
+module.exports = route;

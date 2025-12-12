@@ -1,20 +1,30 @@
-const express=require('express');
-const {updatePassword,getPrescription,viewProfile}=require('../controllers/userController')
-const route=express.Router()
-const authMiddleware=require('../middlewares/authMiddleware')
-const {patientRoleMiddleware}=require('../middlewares/roleMiddleware')
-//import ur controllers
+const express = require("express");
+const router = express.Router();
+
+const authMiddleware = require("../middlewares/authMiddleware");
+const { patientRoleMiddleware } = require("../middlewares/roleMiddleware");
+
+const {
+  updatePassword,
+  getPrescription,
+  viewProfile,
+  updateProfile,
+  getMe
+} = require("../controllers/userController");
 
 
-
-//to update the password
-route.put("/updatePassword",updatePassword)
-
-//view ur homepage
-route.get("/homepage",authMiddleware,patientRoleMiddleware,viewProfile);
+router.put("/updatePassword", authMiddleware, updatePassword);
 
 
-//view ur prescription
-route.get("/prescription",authMiddleware,getPrescription)
+router.get("/homepage", authMiddleware, patientRoleMiddleware, viewProfile);
 
-module.exports=route
+
+router.get("/prescription", authMiddleware, patientRoleMiddleware, getPrescription);
+
+
+router.put("/updateProfile", authMiddleware, updateProfile);
+
+
+router.get("/me", authMiddleware, getMe);
+
+module.exports = router;

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Button from "../../components/Button";
-import GoogleLoginButton from "../../components/GoogleLoginButton";
 import { useNavigate } from "react-router-dom";
 import CardSwap, { Card } from "../../components/ui/CardSwap"
 import doctor1 from "../../assets/doctor1.jpg";
@@ -76,8 +75,8 @@ function Loginpage() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // ⭐ REDIRECT based on role
-      if (role === "Patient") navigate("/user/homepage");
-      if (role === "Doctor") navigate("/doctor/homepage");
+      if (role === "Patient") navigate("/patient/dashboard");
+      if (role === "Doctor") navigate("/doctor/dashboard");
     } catch (error) {
       console.log("Login error:", error);
       setBackendError("Server error. Please try again later.");
@@ -212,14 +211,9 @@ function Loginpage() {
             )}
 
             {/* Divider */}
-            <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 border-t border-gray-300"></div>
-              <span className="text-gray-500 text-sm">OR</span>
-              <div className="flex-1 border-t border-gray-300"></div>
-            </div>
+            
 
-            {/* Google Login Button */}
-            <GoogleLoginButton />
+           
           </form>
         </div>
       </div>

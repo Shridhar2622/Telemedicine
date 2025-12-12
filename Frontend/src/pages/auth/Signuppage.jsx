@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
 import CardSwap, { Card } from "../../components/ui/CardSwap"
 import doctor1 from "../../assets/doctor1.jpg";
 import doctor2 from "../../assets/doctor2.jpg";
 import doctor3 from "../../assets/doctor3.jpg";
+import "./LoginPage.css";
 
 
 function Signuppage() {
@@ -97,129 +97,106 @@ function Signuppage() {
   };
 
   return (
-    <div className="h-screen w-full flex">
+    <div className="login-container">
       {/* LEFT POSTER SECTION */}
-        <div className="hidden md:flex flex-1 bg-indigo-500 items-center justify-center">
-        <div className="relative h-[700px] w-full overflow-hidden">
-
-    <CardSwap
-      cardDistance={60}
-      verticalDistance={70}
-      delay={5000}
-      pauseOnHover={false}
-    >
-
-    <Card>
-      <img src={doctor1} alt="" />
-    </Card>
-    <Card>
- 
-      <img src={doctor2} alt="" />
-    </Card>
-    <Card>
-
-      <img src={doctor3} alt="" />
-    </Card>
-
-    </CardSwap>
-  </div>
+      <div className="login-showcase">
+        <div className="showcase-content floating">
+          <CardSwap
+            cardDistance={60}
+            verticalDistance={70}
+            delay={5000}
+            pauseOnHover={false}
+          >
+            <Card>
+              <img src={doctor1} alt="Professional Doctor" />
+            </Card>
+            <Card>
+              <img src={doctor2} alt="Medical Professional" />
+            </Card>
+            <Card>
+              <img src={doctor3} alt="Healthcare Expert" />
+            </Card>
+          </CardSwap>
+        </div>
       </div>
 
-
       {/* RIGHT FORM SECTION */}
-      <div className="flex flex-1 items-center justify-center">
-        <div className="w-80 md:w-96 flex flex-col gap-6">
-
+      <div className="login-form-section">
+        <div className="login-form-container">
+          
           {/* Header */}
-          <div>
-            <h2 className="text-4xl font-bold">Sign Up</h2>
-            <h4 className="text-gray-500 text-sm">
+          <div className="login-header">
+            <h2 className="login-title">Create Account</h2>
+            <h4 className="login-subtitle">
               Already have an account?{" "}
-              <span
-                className="text-indigo-600 font-semibold underline cursor-pointer"
+              <a
+                href="#"
+                className="signup-link"
                 onClick={() => navigate("/login")}
               >
                 Log In
-              </span>
+              </a>
             </h4>
           </div>
 
           {/* FORM */}
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form className="login-form" onSubmit={handleSubmit}>
             
             {/* Username */}
-            <div className="flex flex-col gap-1">
-              <label className="font-medium">UserName</label>
+            <div className="form-group">
+              <label className="form-label">UserName</label>
               <input
-                className={`border rounded-md h-10 px-3 text-[16px] ${
-                  fieldError.userName ? "border-red-500" : "border-gray-400"
-                }`}
+                className={`form-input ${fieldError.userName ? "error" : ""}`}
                 type="text"
                 placeholder="Enter username"
                 onChange={(e) => setUserName(e.target.value)}
                 value={userName}
               />
               {fieldError.userName && (
-                <p className="text-[13px] text-red-500">
-                  {fieldError.userName}
-                </p>
+                <p className="error-message">⚠️ {fieldError.userName}</p>
               )}
             </div>
 
             {/* Email */}
-            <div className="flex flex-col gap-1">
-              <label className="font-medium">Email</label>
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
               <input
-                className={`border rounded-md h-10 px-3 text-[16px] ${
-                  fieldError.email ? "border-red-500" : "border-gray-400"
-                }`}
+                className={`form-input ${fieldError.email ? "error" : ""}`}
                 type="email"
                 placeholder="Enter email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
               {fieldError.email && (
-                <p className="text-[13px] text-red-500">
-                  {fieldError.email}
-                </p>
+                <p className="error-message">⚠️ {fieldError.email}</p>
               )}
             </div>
 
             {/* Password */}
-            <div className="flex flex-col gap-1">
-              <label className="font-medium">Password</label>
+            <div className="form-group">
+              <label className="form-label">Password</label>
               <input
-                className={`border rounded-md h-10 px-3 text-[16px] ${
-                  fieldError.password ? "border-red-500" : "border-gray-400"
-                }`}
+                className={`form-input ${fieldError.password ? "error" : ""}`}
                 type="password"
                 placeholder="Enter password"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
               />
               {fieldError.password && (
-                <p className="text-[13px] text-red-500">
-                  {fieldError.password}
-                </p>
+                <p className="error-message">⚠️ {fieldError.password}</p>
               )}
             </div>
 
             {/* ROLE SELECTOR */}
-            <div className="flex flex-col gap-2">
-              <label className="font-medium">Select Role</label>
+            <div className="role-selector">
+              <label className="form-label">Register As</label>
 
-              <div className="flex gap-3">
+              <div className="role-buttons">
                 {["Patient", "Doctor"].map((item) => (
                   <button
                     type="button"
                     key={item}
-                    className={`px-4 py-2 rounded-xl border transition-all 
-                      ${
-                        role === item
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-white text-gray-600 border-gray-300"
-                      }
-                    `}
+                    className={`role-button ${role === item ? "active" : ""}`}
                     onClick={() => setRole(item)}
                   >
                     {item}
@@ -229,19 +206,22 @@ function Signuppage() {
             </div>
 
             {/* Submit */}
-            <div className="pt-3">
-              <Button
-                value={loading ? "Creating account..." : "Create account"}
+            <div className="submit-section">
+              <button
                 type="submit"
+                className="login-button"
                 disabled={loading}
-              />
+              >
+                {loading && <span className="loading-spinner"></span>}
+                {loading ? "Creating account..." : "Create Account"}
+              </button>
             </div>
 
             {/* Backend error */}
             {backendError && (
-              <p className="text-[13px] text-red-500 text-center">
-                {backendError}
-              </p>
+              <div className="backend-error">
+                ⚠️ {backendError}
+              </div>
             )}
           </form>
         </div>

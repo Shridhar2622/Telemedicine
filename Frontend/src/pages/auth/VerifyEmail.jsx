@@ -28,7 +28,7 @@ function VerifyEmail() {
     }
 
     sendOtp();
-  }, []);
+  }, [email]);
 
   // ⭐ Validate OTP before submit
   function validateOtp() {

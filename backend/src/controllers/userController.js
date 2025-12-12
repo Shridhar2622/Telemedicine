@@ -1,156 +1,190 @@
-const User=require('../models/User')
-const bcrypt=require('bcrypt')
-const Prescription= require('../models/Prescription.js')
-const jwt=require('jsonwebtoken')
-//Handle Register
+const User = require("../models/User");
+const bcrypt = require("bcrypt");
+const Prescription = require("../models/Prescription");
+const generateOTP = require("../utils/generateOTP");
+const sendEmail = require("../services/emailService");
 
+const updatePassword = async (req, res) => {
+  try {
+    const userId = req.user.id; // NEVER trust email from body
 
-//update password
-async function updatePassword(req,res){
-    try{
-        const{email,oldPassword,newPassword}=req.body
+    const { oldPassword, newPassword } = req.body;
 
-        //any empty fields
-        if(!email || !oldPassword || !newPassword)
-        {
-            return res.status(400).json({
-                message: "All fields are required"
-            })
-        }
-
-        //Check if user exist or not
-        const user= await User.findOne({email})
-        if(!user){
-             return res.status(404).json({
-                message: "User not found"
-            })
-        }
-        
-
-        //comapre oldPassword is true or not
-        const hashedPassword=await bcrypt.compare(oldPassword,user.password)
-        if(!hashedPassword)
-        {
-            return res.status(403).json({
-                message: "Password is wrong. Try using correct password"
-            })
-        }
-
-        //hash the password
-        const salt=await bcrypt.genSalt(10)
-        const newHashPassword=await bcrypt.hash(newPassword,salt)
-        user.password= newHashPassword
-        await user.save()
-
-        return res.status(202).json({
-            message: "Passwrod updated succesfully"
-        })
-
-    }catch(e)
-    {
-        console.log(e)
-        res.status(500).json({
-            message: "Server error"
-        })
-    }
-}
-
-
-//view prescription
-async function getPrescription(req,res){
-    try {
-        const userId=req.user.id
-        const prescription=await Prescription.find({patient: userId})
-        if(!prescription || prescription.length===0) {
-            return res.status(401).json({
-                messaage: "No prescription found"
-            })
-        }
-
-       return res.status(200).json(prescription)
-
-        
-    } catch (e) {
-        console.log(e);
-        return res.status(500).json({
-            message: "Server issue"
-        })
-        
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Old and new passwords are required",
+      });
     }
 
-}
-
-
-
-//User homepage
-function viewProfile(req,res){
-    try {
-        
-        return res.status(200).json({
-            message: `${req.user.userName} welcome to homepage`
-        })
-
-    }catch(e){
-        console.log(e)
-        return res.status(200).json({
-            message: `server error`
-        })
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
-}
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(403).json({
+        success: false,
+        message: "Old password is incorrect",
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("updatePassword Error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 
-//update profile
-async function updateProfile(req, res) {
-    try {
-        const userId = req.user.id;  // The logged-in user's ID
-        
-        const { userName } = req.body;
 
-        if (!userName) {
-            return res.status(400).json({
-                message: "Please enter a username"
-            });
+const getPrescription = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const prescriptions = await Prescription.find({ patient: userId })
+      .populate("doctor", "userName email");
+
+    if (!prescriptions.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No prescriptions found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      count: prescriptions.length,
+      data: prescriptions,
+    });
+  } catch (error) {
+    console.error("getPrescription Error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+
+const viewProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("viewProfile Error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { userName, fullName, email, style } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Update fields if provided
+    if (userName && userName !== user.userName) {
+        const usernameTaken = await User.findOne({ userName });
+        if (usernameTaken) {
+            return res.status(409).json({ success: false, message: "Username already taken" });
         }
-
-        // Find the currently logged in user
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
-
-        // Check if username is taken
-        const existingUser = await User.findOne({ userName });
-
-        if (existingUser && existingUser._id.toString() !== userId) {
-            return res.status(409).json({
-                message: "Username already taken, try a different one"
-            });
-        }
-
-        // Update username
         user.userName = userName;
-        await user.save();
-
-        return res.status(200).json({
-            message: "Username updated successfully",
-            user: {
-                userName: user.userName,
-                email: user.email,
-                style: user.style
-            }
-        });
-
-    } catch (e) {
-        console.log(e);
-        return res.status(500).json({
-            message: "Server error"
-        });
     }
-}
+
+    if (email && email !== user.email) {
+        const emailTaken = await User.findOne({ email });
+        if (emailTaken) {
+            return res.status(409).json({ success: false, message: "Email already taken" });
+        }
+        user.email = email;
+        user.isEmailVerified = false; 
+        
+        // Generate and send OTP for new email
+        const OTP = generateOTP();
+        user.emailVerificationOTP = OTP;
+        user.emailVerificationExpires = Date.now() + 5 * 60 * 1000;
+
+        try {
+          await sendEmail(
+            email,
+            "Email Verification OTP",
+            `<p>Your OTP is <b>${OTP}</b>. It is valid for 5 minutes.</p>`
+          );
+        } catch (e) {
+          console.error("Failed to send verification email:", e);
+          // We can still proceed but maybe warn the user? For now just log it.
+        }
+    }
+
+    if (fullName !== undefined) user.fullName = fullName;
+    if (style !== undefined) user.style = style;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        _id: user._id,
+        userName: user.userName,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        style: user.style
+      },
+    });
+  } catch (error) {
+    console.error("updateProfile Error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 
 
-module.exports={updatePassword,getPrescription,viewProfile,updateProfile}
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("getMe Error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+module.exports = {
+  updatePassword,
+  getPrescription,
+  viewProfile,
+  updateProfile,
+  getMe,
+};
