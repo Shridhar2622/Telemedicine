@@ -91,7 +91,7 @@
       });
 
     } catch (e) {
-      console.error("🔥 Error in viewAppointment:", e);
+      console.error("Error in viewAppointment:", e);
       return res.status(500).json({ message: "Server Problem: " + e.message });
     }
   }
@@ -129,7 +129,7 @@
   // 📌 DOCTOR — ACCEPT OR REJECT APPOINTMENT
   async function updateAppointmentStatus(req, res) {
     try {
-      const { appointmentId, status } = req.body;
+      const { appointmentId, status, meetingRoom } = req.body;
 
       if (!["accepted", "rejected"].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
@@ -151,6 +151,8 @@
       }
 
       appt.status = status;
+      if (meetingRoom) appt.meetingRoom = meetingRoom;
+      
       await appt.save();
 
       return res.status(200).json({

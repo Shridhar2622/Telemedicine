@@ -228,6 +228,52 @@ const updatePrescription = async (req, res) => {
 };
 
 
+// ---------------------------------------------
+// 📌 DELETE PRESCRIPTION (Doctor OR Patient)
+// ---------------------------------------------
+const deletePrescription = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const prescription = await Prescription.findById(id);
+
+    if (!prescription) {
+      return res.status(404).json({
+        success: false,
+        message: "Prescription not found",
+      });
+    }
+
+    // Allow Doctor (creator) OR Patient (owner) to delete
+    if (
+      prescription.doctor.toString() !== userId &&
+      prescription.patient.toString() !== userId
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this prescription",
+      });
+    }
+
+    await prescription.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Prescription deleted successfully",
+    });
+
+  } catch (error) {
+    console.error("Error in deletePrescription:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+
 
 module.exports = {
   createPrescription,
@@ -235,4 +281,5 @@ module.exports = {
   getPrescriptionsForPatient,
   getPrescriptionsForDoctor,
   updatePrescription,
+  deletePrescription,
 };

@@ -9,7 +9,8 @@ const {
   getPrescriptionById,
   getPrescriptionsForPatient,
   getPrescriptionsForDoctor,
-  updatePrescription
+  updatePrescription,
+  deletePrescription
 } = require("../controllers/prescriptionController");
 
 // ----------------------------------------------
@@ -65,6 +66,16 @@ router.patch(
   authMiddleware,
   doctorRoleMiddleware,
   updatePrescription
+);
+
+// ----------------------------------------------
+// DELETE PRESCRIPTION
+// DELETE /api/prescriptions/:id
+// ----------------------------------------------
+router.delete(
+  "/:id",
+  authMiddleware,
+  deletePrescription
 );
 
 module.exports = router;

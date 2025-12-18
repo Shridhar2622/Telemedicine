@@ -30,7 +30,7 @@ route.patch("/status", authMiddleware, doctorRoleMiddleware, updateAppointmentSt
 
 
 // 📌 PATIENT — CANCEL APPOINTMENT
-route.delete("/cancel", authMiddleware, patientRoleMiddleware, cancelAppointment);
+route.patch("/cancel", authMiddleware, patientRoleMiddleware, cancelAppointment);
 
 
 module.exports = route;

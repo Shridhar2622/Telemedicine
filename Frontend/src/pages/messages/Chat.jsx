@@ -4,6 +4,7 @@ import api from '../../utils/api';
 import useFetchData from '../../hooks/useFetchData';
 import { useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import PrescriptionModal from '../../components/PrescriptionModal';
 
 const ENDPOINT = "http://localhost:5000"; // Should be env var in production
 
@@ -13,6 +14,7 @@ const Chat = () => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [loadingMessages, setLoadingMessages] = useState(false);
+    const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
     
     const messagesEndRef = useRef(null);
     const location = useLocation();
@@ -161,9 +163,14 @@ const Chat = () => {
                                                 <span className="text-xs text-slate-400">{new Date(user.lastMessageTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                             )}
                                         </div>
-                                        <p className={`text-sm truncate ${user.read === false ? 'font-bold text-slate-800' : 'text-slate-500'}`}>
-                                            {user.lastMessage || 'Start a conversation'}
-                                        </p>
+                                        <div className="flex justify-between items-center gap-2">
+                                            <p className="text-sm truncate text-slate-500 flex-1">
+                                                {user.lastMessage || 'Start a conversation'}
+                                            </p>
+                                            {user.read === false && (
+                                                <div className="w-2.5 h-2.5 bg-primary rounded-full shrink-0 animate-pulse"></div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))
@@ -187,6 +194,18 @@ const Chat = () => {
                                 <div>
                                     <h3 className="font-bold text-slate-800">{selectedUser.userName}</h3>
                                     <span className="text-xs text-slate-500 capitalize">{selectedUser.role}</span>
+                                </div>
+                                <div className="ml-auto">
+                                    {currentUser.role === 'Doctor' && selectedUser.role === 'Patient' && (
+                                        <button 
+                                            onClick={() => setIsPrescriptionModalOpen(true)}
+                                            className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-sm border border-emerald-200"
+                                            title="Write Prescription"
+                                        >
+                                            <span className="text-lg">💊</span>
+                                            Write Rx
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -251,6 +270,14 @@ const Chat = () => {
                     )}
                 </div>
             </div>
+
+            
+            <PrescriptionModal 
+                isOpen={isPrescriptionModalOpen} 
+                onClose={() => setIsPrescriptionModalOpen(false)}
+                patientId={selectedUser?._id}
+                patientName={selectedUser?.userName}
+            />
         </MainLayout>
     );
 };

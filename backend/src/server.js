@@ -49,34 +49,8 @@ server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} 🚀`);
   console.log(`Socket.io is ready ⚡`);
 
-  setInterval(async () => {
-    try {
-      const Appointment = require("./models/Appointment");
-      // const moment = require("moment"); // Removed dependency
-
-      const now = new Date();
-      
-      const pendingAppts = await Appointment.find({ status: "pending" });
-
-      for (const appt of pendingAppts) {
-        try {
-            // Combine date (YYYY-MM-DD) and time (HH:MM) to create a Date object
-            // status: cancelled if past
-            const dateTimeString = `${appt.date}T${appt.timeSlot.start}:00`;
-            const apptDate = new Date(dateTimeString);
-
-            if (!isNaN(apptDate.getTime()) && apptDate < now) {
-                appt.status = "cancelled";
-                await appt.save();
-                console.log(`Auto-cancelled expired appointment: ${appt._id}`);
-            }
-        } catch (err) {
-            console.error(`Error processing appointment ${appt._id}:`, err.message);
-        }
-      }
-    } catch (error) {
-      console.error("Error in auto-cancel job:", error.message);
-    }
-  }, 10 * 60 * 1000); // Run every 10 minutes
+  // Initialize Cron Jobs
+  const initCronJobs = require("./utils/cronJobs");
+  initCronJobs();
 
 });

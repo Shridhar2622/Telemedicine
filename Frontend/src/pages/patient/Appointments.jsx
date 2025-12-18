@@ -29,7 +29,7 @@ const Appointments = () => {
     };
 
     const filteredAppointments = appointments.filter(appt => {
-        if (filter === 'upcoming') return appt.status === 'scheduled' || appt.status === 'pending';
+        if (filter === 'upcoming') return appt.status === 'scheduled' || appt.status === 'pending' || appt.status === 'accepted';
         if (filter === 'completed') return appt.status === 'completed';
         if (filter === 'cancelled') return appt.status === 'cancelled' || appt.status === 'rejected';
         return true;
@@ -37,9 +37,10 @@ const Appointments = () => {
 
     const getStatusColor = (status) => {
         switch (status) {
+            case 'accepted': return 'text-green-600 bg-green-50 border-green-200';
             case 'scheduled': return 'text-blue-600 bg-blue-50 border-blue-200';
-            case 'pending': return 'text-orange-600 bg-orange-50 border-orange-200';
-            case 'completed': return 'text-green-600 bg-green-50 border-green-200';
+            case 'pending': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+            case 'completed': return 'text-indigo-600 bg-indigo-50 border-indigo-200';
             case 'cancelled': 
             case 'rejected': return 'text-red-600 bg-red-50 border-red-200';
             default: return 'text-slate-600 bg-slate-50 border-slate-200';

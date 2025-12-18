@@ -16,12 +16,13 @@ const DoctorAppointments = () => {
     const upcomingAppointments = appointments.filter(a => a.status === 'accepted' || a.status === 'scheduled');
     const pastAppointments = appointments.filter(a => ['completed', 'rejected', 'cancelled'].includes(a.status));
 
-    const handleStatusUpdate = async (appointmentId, newStatus) => {
+    const handleStatusUpdate = async (appointmentId, newStatus, meetingRoomLink = null) => {
         setProcessingId(appointmentId);
         try {
             await api.patch('/appointments/status', {
                 appointmentId,
-                status: newStatus
+                status: newStatus,
+                meetingRoom: meetingRoomLink // renamed argument to avoid conflict if any
             });
             refetch();
         } catch (error) {
@@ -37,7 +38,26 @@ const DoctorAppointments = () => {
         return new Date(dateStr).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     };
 
-    const AppointmentItem = ({ appt, isPending }) => (
+    const AppointmentItem = ({ appt, isPending }) => {
+        const [showLinkInput, setShowLinkInput] = useState(false);
+        const [meetingLink, setMeetingLink] = useState('');
+
+        const handleAccept = () => {
+             // 1. Open Google Meet in new tab
+             window.open('https://meet.google.com/new', '_blank');
+             // 2. Show input for link
+             setShowLinkInput(true);
+        };
+
+        const confirmAccept = () => {
+            if (!meetingLink) {
+                alert("Please paste the Google Meet link");
+                return;
+            }
+            handleStatusUpdate(appt._id, 'accepted', meetingLink);
+        };
+
+        return (
         <Card className="mb-4 bg-white border border-slate-100 hover:shadow-md transition-all">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-4">
@@ -53,26 +73,60 @@ const DoctorAppointments = () => {
                             <span>📅 {formatDate(appt.date)}</span>
                             <span>⏰ {appt.timeSlot?.start} - {appt.timeSlot?.end}</span>
                         </div>
+                         {appt.meetingRoom && (
+                            <a href={appt.meetingRoom} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline mt-1 block">
+                                Join Meeting: {appt.meetingRoom}
+                            </a>
+                        )}
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
                     {isPending ? (
                         <>
-                            <button 
-                                onClick={() => handleStatusUpdate(appt._id, 'rejected')}
-                                disabled={processingId === appt._id}
-                                className="flex-1 md:flex-none px-4 py-2 border border-red-200 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                            >
-                                Reject
-                            </button>
-                            <button 
-                                onClick={() => handleStatusUpdate(appt._id, 'accepted')}
-                                disabled={processingId === appt._id}
-                                className="flex-1 md:flex-none px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 shadow-lg shadow-green-600/20 transition-all disabled:opacity-50"
-                            >
-                                {processingId === appt._id ? 'Processing...' : 'Accept'}
-                            </button>
+                            {!showLinkInput ? (
+                                <>
+                                    <button 
+                                        onClick={() => handleStatusUpdate(appt._id, 'rejected')}
+                                        disabled={processingId === appt._id}
+                                        className="flex-1 md:flex-none px-4 py-2 border border-red-200 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                                    >
+                                        Reject
+                                    </button>
+                                    <button 
+                                        onClick={handleAccept}
+                                        disabled={processingId === appt._id}
+                                        className="flex-1 md:flex-none px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 shadow-lg shadow-green-600/20 transition-all disabled:opacity-50"
+                                    >
+                                        Accept
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="flex flex-col gap-2 animate-fade-in">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Paste Google Meet Link" 
+                                        value={meetingLink}
+                                        onChange={(e) => setMeetingLink(e.target.value)}
+                                        className="text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                                    />
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => setShowLinkInput(false)}
+                                            className="px-3 py-1 text-slate-500 text-xs hover:bg-slate-100 rounded"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            onClick={confirmAccept}
+                                            disabled={processingId === appt._id}
+                                            className="px-4 py-1 bg-green-600 text-white text-xs font-bold rounded shadow-md hover:bg-green-700 disabled:opacity-50"
+                                        >
+                                            {processingId === appt._id ? 'Saving...' : 'Save Link'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <div className="flex items-center gap-2">
@@ -105,6 +159,7 @@ const DoctorAppointments = () => {
             </div>
         </Card>
     );
+    };
 
     return (
         <MainLayout>

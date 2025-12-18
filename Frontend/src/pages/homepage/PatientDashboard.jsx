@@ -12,7 +12,7 @@ const PatientDashboard = () => {
     const { data: prescriptions, loading: prescLoading } = useFetchData('/user/prescription');
 
     const apptList = appointments?.appointments || [];
-    const upcomingAppointments = apptList.filter(a => a.status === 'scheduled' || a.status === 'pending');
+    const upcomingAppointments = apptList.filter(a => a.status === 'scheduled' || a.status === 'pending' || a.status === 'accepted');
     
     const prescriptionCount = prescriptions?.data?.length || 0;
     
