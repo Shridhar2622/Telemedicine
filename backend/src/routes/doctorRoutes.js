@@ -10,6 +10,8 @@ const {
   getAllDoctors,
   checkProfileStatus,
   updateDoctorSchedule,
+  getDoctorPublicProfile,
+  getDoctorPayments,
 } = require("../controllers/doctorController");
 
 
@@ -17,12 +19,12 @@ router.get("/profile/status", authMiddleware, doctorRoleMiddleware, checkProfile
 
 router.post("/profile", authMiddleware, doctorRoleMiddleware, createOrUpdateDoctorProfile);
 
-router.put("/schedule", authMiddleware, doctorRoleMiddleware, updateDoctorSchedule);
-
-router.get("/profile", authMiddleware, doctorRoleMiddleware, getDoctorProfile);
-
+router.get("/profile", authMiddleware, getDoctorProfile);
+router.get("/profile/:id", getDoctorPublicProfile); // Public profile access
+// router.put("/profile", authMiddleware, updateDoctorProfile); // Removed as createOrUpdate handles this
 router.get("/", getAllDoctors);
-
+// router.get("/stats", authMiddleware, getDoctorStats);
 router.get("/:id", getDoctorById);
+router.get("/payments/history", authMiddleware, getDoctorPayments); // Changed path to avoid conflict with :id
 
 module.exports = router;

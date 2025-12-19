@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '../../layouts/MainLayout';
 import Card from '../../components/ui/Card';
-import useFetchData from '../../hooks/useFetchData';
+// import useFetchData from '../../hooks/useFetchData'; // Removed useFetchData hook
 import BookingModal from '../../components/BookingModal'; // Reusing existing booking modal
 
 const PublicDoctorProfile = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { data, loading, error } = useFetchData(`/doctor/${id}`);
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
+
+    useEffect(() => {
+        const fetchDoctorProfile = async () => {
+            try {
+                setLoading(true);
+                const res = await fetch(`http://localhost:5000/api/doctor/${id}`);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                const result = await res.json();
+                setData(result);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDoctorProfile();
+    }, [id]);
 
     const doctor = data?.data;
 

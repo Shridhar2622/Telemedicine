@@ -16,7 +16,7 @@ function VerifyEmail() {
   useEffect(() => {
     async function sendOtp() {
       try {
-        await fetch("http://localhost:3000/api/auth/verifyEmail", {
+        await fetch("http://localhost:5000/api/auth/verifyEmail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -57,7 +57,7 @@ function VerifyEmail() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/verifyOTP", {
+      const res = await fetch("http://localhost:5000/api/auth/verifyOTP", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ otp, email }),

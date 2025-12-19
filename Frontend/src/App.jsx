@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Signuppage from "./pages/auth/Signuppage.jsx";
 import Loginpage from "./pages/auth/Loginpage.jsx";
 import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
+import AuthSuccess from "./pages/auth/AuthSuccess.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import PatientPage from "./pages/homepage/PatientPage.jsx";
 import PatientDashboard from "./pages/homepage/PatientDashboard.jsx";
@@ -17,8 +18,16 @@ import DoctorSchedule from "./pages/doctor/DoctorSchedule.jsx";
 import MyPatients from "./pages/doctor/MyPatients.jsx";
 import DoctorProfile from "./pages/doctor/DoctorProfile.jsx";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments.jsx";
+import DoctorPayments from "./pages/doctor/DoctorPayments.jsx";
 import Chat from "./pages/messages/Chat.jsx";
 
+
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminDoctors from "./pages/admin/AdminDoctors";
+
+import AdminProfile from "./pages/admin/AdminProfile";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminCoupons from "./pages/admin/AdminCoupons";
 
 function App() {
   return (
@@ -29,6 +38,7 @@ function App() {
           <Route path="/signup" element={<Signuppage />} />
           <Route path="/login" element={<Loginpage />} />
           <Route path="/verifyemail" element={<VerifyEmail />} />
+          <Route path="/auth/success" element={<AuthSuccess />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/patient/homepage" element={<PatientPage />} />
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
@@ -43,11 +53,17 @@ function App() {
           <Route path="/doctor/patients" element={<MyPatients />} />
           <Route path="/doctor/profile" element={<DoctorProfile />} />
           <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+          <Route path="/doctor/payments" element={<DoctorPayments />} />
           <Route path="/doctor/messages" element={<Chat />} />
           
           {/* Admin Route */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/doctors" element={<AdminDoctors />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/coupons" element={<AdminCoupons />} />
         </Routes>
     </div>
   );

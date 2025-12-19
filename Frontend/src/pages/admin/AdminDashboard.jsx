@@ -1,54 +1,93 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import AdminLayout from '../../layouts/AdminLayout';
+import StatsCard from '../../components/admin/StatsCard';
+import { Users, UserPlus, Calendar, FileText } from 'lucide-react';
+import axios from 'axios';
 
 const AdminDashboard = () => {
-    const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        totalDoctors: 0,
+        totalAppointments: 0,
+        totalPrescriptions: 0
+    });
+    const [loading, setLoading] = useState(true);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        navigate('/admin');
-    };
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get('http://localhost:5000/api/admin/stats', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (response.data.success) {
+                    setStats(response.data.stats);
+                }
+            } catch (error) {
+                console.error("Error fetching stats:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div className="flex justify-center items-center h-full">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+            </AdminLayout>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-gray-100 p-8">
-            <div className="max-w-7xl mx-auto">
-                <header className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-                        <p className="text-gray-600">Welcome back, {user.email}</p>
-                    </div>
-                    <button 
-                        onClick={handleLogout}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded shadow transition-colors"
-                    >
-                        Logout
-                    </button>
-                </header>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Placeholder Cards */}
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h3 className="text-xl font-semibold mb-2">Users</h3>
-                        <p className="text-gray-500">Manage platform users.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h3 className="text-xl font-semibold mb-2">Doctors</h3>
-                        <p className="text-gray-500">Approve or reject doctor applications.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h3 className="text-xl font-semibold mb-2">Statistics</h3>
-                        <p className="text-gray-500">View platform analytics.</p>
-                    </div>
-                </div>
-                
-                <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-bold mb-4">Pending Approvals</h2>
-                    <p className="text-gray-500 italic">No pending approvals found (Placeholder).</p>
+        <AdminLayout>
+            <div className="mb-8">
+                <h1 className="text-2xl font-bold text-slate-800 mb-2">Dashboard Overview</h1>
+                <p className="text-slate-500">Welcome to the admin control center.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <StatsCard 
+                    title="Total Users" 
+                    value={stats.totalUsers} 
+                    icon={Users} 
+                    color="bg-blue-500" 
+                />
+                <StatsCard 
+                    title="Doctors" 
+                    value={stats.totalDoctors} 
+                    icon={UserPlus} 
+                    color="bg-indigo-500" 
+                />
+                <StatsCard 
+                    title="Appointments" 
+                    value={stats.totalAppointments} 
+                    icon={Calendar} 
+                    color="bg-emerald-500" 
+                />
+                <StatsCard 
+                    title="Prescriptions" 
+                    value={stats.totalPrescriptions} 
+                    icon={FileText} 
+                    color="bg-orange-500" 
+                />
+            </div>
+
+            {/* Placeholder for Recent Activity or Charts */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                <h2 className="text-lg font-semibold text-slate-800 mb-4">System Status</h2>
+                <div className="p-4 bg-green-50 text-green-700 rounded-lg border border-green-200">
+                    All systems operational. Database connected. 
                 </div>
             </div>
-        </div>
+        </AdminLayout>
     );
 };
 

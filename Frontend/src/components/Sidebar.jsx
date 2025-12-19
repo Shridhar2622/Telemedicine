@@ -27,6 +27,7 @@ const Sidebar = () => {
     { name: 'My Schedule', path: '/doctor/schedule', color: 'bg-emerald-500' },
     { name: 'My Patients', path: '/doctor/patients', color: 'bg-purple-500' },
     { name: 'Appointments', path: '/doctor/appointments', color: 'bg-indigo-500' },
+    { name: 'Payments', path: '/doctor/payments', color: 'bg-yellow-500' },
     { name: 'Doctor Directory', path: '/patient/find-doctors', color: 'bg-teal-500' },
     { name: 'Messages', path: '/doctor/messages', color: 'bg-pink-500' },
     { name: 'Profile', path: '/doctor/profile', color: 'bg-orange-500' },
