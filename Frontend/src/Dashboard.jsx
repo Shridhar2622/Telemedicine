@@ -51,23 +51,45 @@ export default function Dashboard() {
         }
     ];
 
+    const [isTransitioning, setIsTransitioning] = useState(true);
+    const extendedDoctors = [...doctors, ...doctors.slice(0, 3)]; // Clone first 3 for seamless loop
+
+    // Handle seamless loop reset
+    useEffect(() => {
+        if (currentSlide === doctors.length) {
+            const timeout = setTimeout(() => {
+                setIsTransitioning(false);
+                setCurrentSlide(0);
+            }, 500); // Wait for transition to finish
+            return () => clearTimeout(timeout);
+        }
+        if (currentSlide === 0 && isTransitioning === false) {
+            // Force reflow/next tick to re-enable transition
+            const timeout = setTimeout(() => {
+                setIsTransitioning(true);
+            }, 50);
+            return () => clearTimeout(timeout);
+        }
+    }, [currentSlide, doctors.length, isTransitioning]);
+
     // Auto-scroll effect
     useEffect(() => {
         if (!isPaused) {
             const interval = setInterval(() => {
-                setCurrentSlide((prev) => (prev + 1) % doctors.length);
-            }, 4000); // Change slide every 4 seconds
+                setCurrentSlide((prev) => prev + 1);
+            }, 1500); // Faster speed (1.5s)
 
             return () => clearInterval(interval);
         }
-    }, [isPaused, doctors.length]);
+    }, [isPaused]);
 
     const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % doctors.length);
+        if (currentSlide >= doctors.length) return; // Prevent double click during reset
+        setCurrentSlide((prev) => prev + 1);
     };
 
     const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + doctors.length) % doctors.length);
+        setCurrentSlide((prev) => (prev === 0 ? doctors.length - 1 : prev - 1));
     };
 
     return (
@@ -239,12 +261,12 @@ export default function Dashboard() {
                         {/* Cards Container */}
                         <div className="overflow-hidden">
                             <div
-                                className="flex transition-transform duration-500 ease-in-out gap-8"
+                                className={`flex gap-8 ${isTransitioning ? 'transition-transform duration-500 ease-in-out' : ''}`}
                                 style={{
                                     transform: `translateX(-${currentSlide * (100 / 3)}%)`
                                 }}
                             >
-                                {doctors.map((doctor, index) => (
+                                {extendedDoctors.map((doctor, index) => (
                                     <div
                                         key={index}
                                         className="min-w-[calc(100%-2rem)] md:min-w-[calc(50%-1rem)] lg:min-w-[calc(33.333%-1.33rem)] hover-lift bg-white rounded-3xl p-8 shadow-lg border border-slate-100 hover:border-indigo-300 group"
