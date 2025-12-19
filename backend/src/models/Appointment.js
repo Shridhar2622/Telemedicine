@@ -39,6 +39,11 @@ timeSlot: {
 
     meetingRoom: {
       type: String // WebRTC room or link
+    },
+    paymentInfo: {
+        paymentId: String,
+        orderId: String,
+        amount: Number
     }
   },
   { timestamps: true }

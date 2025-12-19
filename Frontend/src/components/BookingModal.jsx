@@ -13,6 +13,37 @@ const BookingModal = ({ doctor, onClose, onSuccess }) => {
     const [bookingLoading, setBookingLoading] = useState(false);
     const [error, setError] = useState('');
 
+    const [couponCode, setCouponCode] = useState('');
+    const [discount, setDiscount] = useState(0); // Percentage
+    const [isCouponApplied, setIsCouponApplied] = useState(false);
+    const [couponMessage, setCouponMessage] = useState('');
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return;
+        setValidatingCoupon(true);
+        setCouponMessage('');
+        try {
+            const token = localStorage.getItem('token');
+            const res = await api.post('/coupons/validate', { code: couponCode }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data.success) {
+                setDiscount(res.data.discountPercentage);
+                setIsCouponApplied(true);
+                setCouponMessage(`Coupon applied! You save ${res.data.discountPercentage}%`);
+            }
+        } catch (err) {
+            console.error(err);
+            setDiscount(0);
+            setIsCouponApplied(false);
+            setCouponMessage(err.response?.data?.message || 'Invalid coupon');
+        } finally {
+            setValidatingCoupon(false);
+        }
+    };
+
     // Filter available days that actually have slots
     const availableDays = activeDoctor.availableTimes?.filter(day => day.slots && day.slots.length > 0) || [];
 
@@ -34,6 +65,16 @@ const BookingModal = ({ doctor, onClose, onSuccess }) => {
         return nextDate; // Return Date object
     };
 
+    const loadScript = (src) => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = src;
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
     const handleBook = async () => {
         if (!selectedDay || !selectedSlot) return;
 
@@ -41,25 +82,88 @@ const BookingModal = ({ doctor, onClose, onSuccess }) => {
         setError('');
 
         try {
-            const dateObj = getNextDateForDay(selectedDay.day);
-            const dateStr = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+            // 1. Load Razorpay Script
+            const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+            if (!res) {
+                alert("Razorpay SDK failed to load. Are you online?");
+                setBookingLoading(false);
+                return;
+            }
 
-            const payload = {
-                doctorId: activeDoctor.userId._id || activeDoctor.userId || activeDoctor._id, // Handle potential ID variations
-                date: dateStr,
-                day: selectedDay.day,
-                timeSlot: {
-                    start: selectedSlot.startTime,
-                    end: selectedSlot.endTime
+            // 2. Calculate Amount
+            const finalAmount = Math.round(activeDoctor.consultationFee - (activeDoctor.consultationFee * discount) / 100);
+
+            // 3. Create Order
+            const token = localStorage.getItem('token');
+            const orderRes = await api.post("/payment/create-order", { amount: finalAmount }, {
+                 headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!orderRes.data.success) {
+                throw new Error("Failed to create payment order");
+            }
+            
+            const { order } = orderRes.data;
+
+            // Fetch Key ID from backend
+            const keyRes = await api.get("/payment/key", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const key = keyRes.data.key;
+
+            // 4. Options for Razorpay
+            const options = {
+                key: key, 
+                amount: order.amount,
+                currency: order.currency,
+                name: "TeleMed Health",
+                description: `Consultation with Dr. ${activeDoctor.name}`,
+                order_id: order.id,
+                handler: async function (response) {
+                    // 5. Verify & Book on Success
+                    try {
+                        const dateObj = getNextDateForDay(selectedDay.day);
+                        const dateStr = dateObj.toISOString().split('T')[0];
+
+                        const payload = {
+                            doctorId: activeDoctor.userId._id || activeDoctor.userId || activeDoctor._id,
+                            date: dateStr,
+                            day: selectedDay.day,
+                            timeSlot: {
+                                start: selectedSlot.startTime,
+                                end: selectedSlot.endTime
+                            },
+                            couponCode: isCouponApplied ? couponCode : null,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature
+                        };
+
+                        await api.post('/appointments/book', payload);
+                        if (onSuccess) onSuccess();
+                        onClose();
+                    } catch (bookErr) {
+                         console.error(bookErr);
+                         setError("Payment successful but booking failed. Please contact support.");
+                    }
+                },
+                prefill: {
+                    name: "User", // Can fetch from context
+                    email: "user@example.com",
+                    contact: "9999999999"
+                },
+                theme: {
+                    color: "#3399cc"
                 }
             };
 
-            await api.post('/appointments/book', payload);
-            if (onSuccess) onSuccess();
-            onClose();
+            const paymentObject = new window.Razorpay(options);
+            paymentObject.open();
+
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || 'Failed to book appointment');
+            setError(err.response?.data?.message || 'Failed to initiate payment');
+        } finally {
             setBookingLoading(false);
         }
     };
@@ -144,6 +248,65 @@ const BookingModal = ({ doctor, onClose, onSuccess }) => {
                                     {error}
                                 </div>
                             )}
+
+                            {/* Coupon Section */}
+                            <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Have a Coupon?</label>
+                                <div className="flex gap-2 mb-3">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Enter code"
+                                        value={couponCode}
+                                        onChange={(e) => setCouponCode(e.target.value)}
+                                        disabled={isCouponApplied}
+                                        className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 uppercase"
+                                    />
+                                    {!isCouponApplied ? (
+                                        <button 
+                                            onClick={handleApplyCoupon}
+                                            disabled={!couponCode || validatingCoupon}
+                                            className="px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-900 disabled:opacity-50 transition-colors"
+                                        >
+                                            {validatingCoupon ? 'Checking...' : 'Apply'}
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            onClick={() => {
+                                                setIsCouponApplied(false);
+                                                setDiscount(0);
+                                                setCouponCode('');
+                                                setCouponMessage('');
+                                            }}
+                                            className="px-4 py-2 bg-red-100 text-red-600 text-sm font-medium rounded-lg hover:bg-red-200 transition-colors"
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                                {couponMessage && (
+                                    <p className={`text-xs font-medium mb-3 ${isCouponApplied ? 'text-green-600' : 'text-red-500'}`}>
+                                        {couponMessage}
+                                    </p>
+                                )}
+
+                                {/* Price Breakdown */}
+                                <div className="space-y-2 pt-3 border-t border-slate-200">
+                                    <div className="flex justify-between text-sm text-slate-500">
+                                        <span>Consultation Fee</span>
+                                        <span>₹{activeDoctor.consultationFee}</span>
+                                    </div>
+                                    {isCouponApplied && (
+                                        <div className="flex justify-between text-sm text-green-600 font-medium">
+                                            <span>Discount ({discount}%)</span>
+                                            <span>-₹{Math.round((activeDoctor.consultationFee * discount) / 100)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between text-base font-bold text-slate-800 pt-1">
+                                        <span>Total to Pay</span>
+                                        <span>₹{Math.round(activeDoctor.consultationFee - (activeDoctor.consultationFee * discount) / 100)}</span>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div className="flex gap-3 mt-4">
                                 <button

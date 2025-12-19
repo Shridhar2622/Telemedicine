@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const path = require("path");
 const Admin = require("../models/Admin");
 
-dotenv.config({ path: "../../.env" });
+dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 const createAdmin = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGODB_URL);
     console.log("MongoDB Connected");
 
     const existingAdmin = await Admin.findOne({ email: "admin@telemedicine.com" });
@@ -28,7 +29,7 @@ const createAdmin = async () => {
     console.log("Password: adminpassword123");
     process.exit();
   } catch (error) {
-    console.error("Error creating admin:", error);
+    console.error("Error creating admin:", error.message);
     process.exit(1);
   }
 };

@@ -92,7 +92,7 @@ const getPrescriptionById = async (req, res) => {
       });
     }
 
-    // Access control
+    
     if (
       prescription.doctor._id.toString() !== userId &&
       prescription.patient._id.toString() !== userId

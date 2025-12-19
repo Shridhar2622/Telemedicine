@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '../../layouts/MainLayout';
 import Card from '../../components/ui/Card';
 import useFetchData from '../../hooks/useFetchData';
-import BookingModal from '../../components/BookingModal'; // Reusing existing booking modal
+import BookingModal from '../../components/BookingModal';
+import toast from 'react-hot-toast';
 
 const PublicDoctorProfile = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { data, loading, error } = useFetchData(`/doctor/${id}`);
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [showBookingModal, setShowBookingModal] = useState(false);
-    const [successMsg, setSuccessMsg] = useState('');
+
+    useEffect(() => {
+        const fetchDoctorProfile = async () => {
+            try {
+                setLoading(true);
+                const res = await fetch(`http://localhost:5000/api/doctor/${id}`);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                const result = await res.json();
+                setData(result);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDoctorProfile();
+    }, [id]);
 
     const doctor = data?.data;
 
@@ -44,11 +66,6 @@ const PublicDoctorProfile = () => {
 
     return (
         <MainLayout>
-             {successMsg && (
-                <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in">
-                    ✅ {successMsg}
-                </div>
-            )}
 
             <div className="max-w-5xl mx-auto animate-slide-up">
                 {/* Header Card */}
@@ -166,8 +183,8 @@ const PublicDoctorProfile = () => {
                     doctor={doctor} 
                     onClose={() => setShowBookingModal(false)} 
                     onSuccess={() => {
-                        setSuccessMsg('Appointment booked successfully!');
-                        setTimeout(() => setSuccessMsg(''), 3000);
+                        toast.success('Appointment booked successfully!');
+                        setShowBookingModal(false);
                     }}
                 />
             )}

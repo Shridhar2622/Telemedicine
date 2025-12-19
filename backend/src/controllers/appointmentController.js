@@ -1,7 +1,9 @@
   const Appointment = require("../models/Appointment");
   const User = require("../models/User");
   const Doctor = require("../models/Doctor");
-  const { getIO } = require("../socket");
+  const Coupon = require("../models/Coupon");
+  const { verifyPaymentSignature } = require("./paymentController");
+const { getIO } = require("../socket");
 
 
   // 📌 BOOK APPOINTMENT (Patient)
@@ -14,7 +16,7 @@
         });
       }
 
-      const { doctorId, date, day, timeSlot } = req.body;
+      const { doctorId, date, day, timeSlot, couponCode, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
       const patient = req.user.id;
 
       if (!doctorId || !date || !day || !timeSlot?.start || !timeSlot?.end) {
@@ -22,6 +24,29 @@
           message: "All fields are required",
         });
       }
+
+      // Verify Payment first
+      if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+           return res.status(400).json({ message: "Payment details missing" });
+      }
+
+      // Check for Idempotency: If this payment was already used for a booking, return it.
+      const existingPaymentAppt = await Appointment.findOne({ 
+          'paymentInfo.paymentId': razorpay_payment_id 
+      });
+
+      if (existingPaymentAppt) {
+          return res.status(200).json({
+              message: "Appointment already booked with this payment",
+              appointment: existingPaymentAppt
+          });
+      }
+
+      const isSignatureValid = verifyPaymentSignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+      if (!isSignatureValid) {
+          return res.status(400).json({ message: "Invalid payment signature" });
+      }
+
 
       // get real doctor profile (doctorId = userId)
       const doctor = await Doctor.findOne({ userId: doctorId });
@@ -44,6 +69,23 @@
         });
       }
 
+      // Handle Coupon Usage
+      let discountApplied = 0;
+      if (couponCode) {
+          const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+          
+          if (coupon) {
+              if (coupon.isActive && 
+                  new Date() <= new Date(coupon.expirationDate) && 
+                  (coupon.usageLimit === null || coupon.usedCount < coupon.usageLimit)) {
+                  
+                  coupon.usedCount += 1;
+                  await coupon.save();
+                  discountApplied = coupon.discountPercentage;
+              }
+          }
+      }
+
       const appointment = await Appointment.create({
         patient,
         doctor: doctor._id,
@@ -51,21 +93,12 @@
         day,
         timeSlot,
         status: "pending",
+        paymentInfo: {
+            paymentId: razorpay_payment_id,
+            orderId: razorpay_order_id,
+            amount: doctor.consultationFee * (1 - discountApplied/100) // approximate
+        }
       });
-
-      // Notify Doctor
-      try {
-          const io = getIO();
-          io.to(doctor.userId.toString()).emit("new_notification", {
-              type: "appointment",
-              message: `New appointment request from a patient`,
-              data: appointment,
-              isRead: false,
-              createdAt: new Date()
-          });
-      } catch (err) {
-          console.error("Socket emit failed:", err.message);
-      }
 
       return res.status(201).json({
         message: "Appointment booked successfully",
@@ -82,7 +115,7 @@
 
   // 📌 PATIENT — VIEW THEIR OWN APPOINTMENTS
   async function viewAppointment(req, res) {
-    console.log("👉 viewAppointment called!");
+
     try {
       if (!req.user) {
          console.error("❌ No req.user found!");
@@ -90,7 +123,6 @@
       }
       
       const patientId = req.user.id;
-      console.log("👤 Patient ID:", patientId);
 
       const appts = await Appointment.find({ patient: patientId })
         .populate({
@@ -98,7 +130,7 @@
           select: "name specialization consultationFee userId"
         });
         
-      console.log(`✅ Found ${appts.length} appointments`);
+
 
       return res.status(200).json({
         success: true,

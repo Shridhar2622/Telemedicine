@@ -243,6 +243,20 @@ async function me(req, res) {
 }
 
 
+async function googleCallback(req, res) {
+  try {
+    const token = generateToken(req.user);
+    // Redirect to frontend with token
+    // Adjust logic to match where you want to land (e.g. dashboard or a specific auth-success page)
+    // For now, redirecting to a route that handles the token on frontend
+    const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
+    res.redirect(`${frontendURL}/auth/success?token=${token}`);
+  } catch (e) {
+    console.log(e);
+    res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
+  }
+}
+
 module.exports = {
   registerUser,
   login,
@@ -250,5 +264,6 @@ module.exports = {
   verifyOTP,
   forgetPassword,
   verifyForgotPasswordOtp,
-  me
+  me,
+  googleCallback
 };

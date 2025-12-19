@@ -2,7 +2,7 @@ const Message = require('../models/Message');
 const User = require('../models/User');
 const { getIO } = require('../socket');
 
-// Send a message
+// Handle sending a new message and notifying the receiver
 const sendMessage = async (req, res) => {
     try {
         const { receiverId, content } = req.body;
@@ -16,12 +16,12 @@ const sendMessage = async (req, res) => {
 
         await newMessage.save();
 
-        // Socket.io: Emit to receiver
+        // Real-time delivery: send to receiver via Socket.io
         try {
             const io = getIO();
             io.to(receiverId).emit("receive_message", newMessage);
             
-            // Notification for the receiver
+            // Also trigger a notification toast for the user
             io.to(receiverId).emit("new_notification", {
                 type: "message",
                 message: `New message from ${req.user.userName || "User"}`, 
@@ -43,7 +43,7 @@ const sendMessage = async (req, res) => {
     }
 };
 
-// Get messages between current user and another user
+// Fetch chat history between two users
 const getMessages = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -63,7 +63,25 @@ const getMessages = async (req, res) => {
     }
 };
 
-// Get list of conversations (latest message per user)
+// Mark all messages from this sender as read
+const markMessagesRead = async (req, res) => {
+    try {
+        const { senderId } = req.params;
+        const currentUserId = req.user.id;
+
+        await Message.updateMany(
+            { sender: senderId, receiver: currentUserId, read: false },
+            { $set: { read: true } }
+        );
+
+        res.status(200).json({ success: true, message: "Messages marked as read" });
+    } catch (error) {
+        console.error("Error marking messages as read:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// Retrieve the list of active conversations with latest message previews
 const getConversations = async (req, res) => {
     try {
         const currentUserId = req.user.id;
@@ -75,20 +93,28 @@ const getConversations = async (req, res) => {
 
         const uniqueUsers = new Map();
 
-        messages.forEach(msg => {
+        for (const msg of messages) {
             const otherUserId = msg.sender.toString() === currentUserId 
                 ? msg.receiver.toString() 
                 : msg.sender.toString();
 
             if (!uniqueUsers.has(otherUserId)) {
+                // Calculate how many unread messages are from this user
+                const unreadCount = await Message.countDocuments({
+                    sender: otherUserId,
+                    receiver: currentUserId,
+                    read: false
+                });
+
                 uniqueUsers.set(otherUserId, {
                     userId: otherUserId,
                     lastMessage: msg.content,
                     timestamp: msg.createdAt,
-                    read: msg.read || false // simple read status
+                    unreadCount: unreadCount,
+                    read: msg.read
                 });
             }
-        });
+        }
 
         // Fetch user details for these IDs
         const userIds = Array.from(uniqueUsers.keys());
@@ -99,7 +125,8 @@ const getConversations = async (req, res) => {
             return {
                 ...user.toObject(),
                 lastMessage: chatData.lastMessage,
-                lastMessageTime: chatData.timestamp
+                lastMessageTime: chatData.timestamp,
+                unreadCount: chatData.unreadCount
             };
         }).sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
 
@@ -110,4 +137,4 @@ const getConversations = async (req, res) => {
     }
 };
 
-module.exports = { sendMessage, getMessages, getConversations };
+module.exports = { sendMessage, getMessages, getConversations, markMessagesRead };

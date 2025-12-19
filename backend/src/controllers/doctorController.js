@@ -279,6 +279,49 @@ const checkProfileStatus = async (req, res) => {
 };
 
 
+// Get doctor's payment history
+const getDoctorPayments = async (req, res) => {
+    try {
+        const doctor = await Doctor.findOne({ userId: req.user.id });
+        if (!doctor) {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+
+        const appointments = await Appointment.find({
+            doctor: doctor._id,
+            status: { $in: ['accepted', 'completed'] }, // Assuming only these statuses mean validated payment
+            'paymentInfo.amount': { $exists: true }
+        }).populate('patient', 'userName email');
+
+        let totalEarnings = 0;
+        const transactions = appointments.map(appt => {
+            const amount = appt.paymentInfo.amount || 0;
+            totalEarnings += amount;
+            return {
+                id: appt._id,
+                patientName: appt.patient ? appt.patient.userName : 'Unknown',
+                date: appt.date,
+                amount: amount,
+                status: 'Paid',
+                paymentId: appt.paymentInfo.paymentId
+            };
+        });
+
+        // Sort by date desc
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        res.status(200).json({
+            success: true,
+            totalEarnings,
+            transactions
+        });
+
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
   createOrUpdateDoctorProfile,
   updateDoctorSchedule,
@@ -287,4 +330,5 @@ module.exports = {
   getDoctorPublicProfile,
   getAllDoctors,
   checkProfileStatus,
+  getDoctorPayments,
 };

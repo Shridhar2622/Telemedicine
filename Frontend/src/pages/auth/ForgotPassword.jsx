@@ -31,7 +31,7 @@ function ForgotPassword() {
 
     try {
       const res = await fetch(
-        "http://localhost:3000/api/auth/forgotPassword",
+        "http://localhost:5000/api/auth/forgotPassword",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -72,7 +72,7 @@ function ForgotPassword() {
 
     try {
       const res = await fetch(
-        "http://localhost:3000/api/auth/forgotPassword/verifyOTP",
+        "http://localhost:5000/api/auth/forgotPassword/verifyOTP",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

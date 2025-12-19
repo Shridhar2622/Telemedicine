@@ -13,18 +13,18 @@ export const SocketProvider = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    // Use a ref to keep track of socket instance to prevent multiple connections
+    // Persist the socket instance across renders
     const socketRef = useRef(null);
 
-    // Unified user ID check
+    // Normalize the user ID
     const userId = user.id || user._id;
 
     useEffect(() => {
         if (userId && !socketRef.current) {
-            const ENDPOINT = "http://localhost:3000"; 
+            const ENDPOINT = "http://localhost:5000"; 
             socketRef.current = io(ENDPOINT);
 
-            socketRef.current.emit("join_room", userId);
+
 
             socketRef.current.on("new_notification", (notification) => {
                 setNotifications((prev) => [notification, ...prev]);
@@ -35,8 +35,10 @@ export const SocketProvider = ({ children }) => {
                 console.error("Socket connection error:", err.message);
             });
             
+            // Ensure the user joins their notification room on every connection
             socketRef.current.on("connect", () => {
                 console.log("Socket connected successfully:", socketRef.current.id);
+                socketRef.current.emit("join_room", userId);
             });
 
             setSocket(socketRef.current);

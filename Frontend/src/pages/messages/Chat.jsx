@@ -18,19 +18,15 @@ const Chat = () => {
     const location = useLocation();
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     
-    // Use global socket
+    // Access the global socket connection
     const { socket } = useSocket();
 
-    // Listen for incoming messages
+    // Set up real-time message listeners
     useEffect(() => {
         if (!socket) return;
 
         const handleNewMessage = (message) => {
-            // If the message is relevant to the currently selected user (either sent by them or sent by me from another device)
-            // Note: message.reciever vs receiver typo check. Backend model says "receiver", but frontend check was "reciever".
-            // Backend Controller: receiver: receiverId.
-            // Let's assume standard "receiver".
-            // In Chat.jsx formerly: message.sender === selectedUser._id || message.reciever === ...
+            // Only add message to state if it belongs to the active chat
             if (selectedUser && (message.sender === selectedUser._id || message.receiver === selectedUser._id)) {
                  setMessages((prev) => [...prev, message]);
             }
@@ -45,7 +41,7 @@ const Chat = () => {
 
     }, [socket, selectedUser]); // Re-bind when socket or selectedUser changes
 
-    // Check if we navigated here with a specific user to chat with
+    // Handle navigation from "Find Doctor" or other pages
     useEffect(() => {
         if (location.state?.userId) {
             // If passed via navigation state
@@ -70,8 +66,18 @@ const Chat = () => {
         setSelectedUser(user);
         setLoadingMessages(true);
         try {
+            // 1. Fetch messages
             const res = await api.get(`/messages/${user._id}`);
             setMessages(res.data.data);
+
+            // 2. Mark as read if there are unread messages
+            if (user.unreadCount > 0) {
+                await api.put(`/messages/read/${user._id}`);
+                // Update local state to reflect read status
+                refetchConversations();
+                // Trigger global badge update
+                window.dispatchEvent(new Event('update-unread-badge'));
+            }
         } catch (error) {
             console.error("Failed to fetch messages", error);
         } finally {
@@ -101,7 +107,7 @@ const Chat = () => {
 
     const conversations = conversationData?.data || [];
     
-    // If selected user is not in conversations (new chat), add them to list temporarily
+    // Temporarily display the selected user in the sidebar if it's a new conversation
     const displayConversations = [...conversations];
     if (selectedUser && !conversations.find(c => c._id === selectedUser._id)) {
         displayConversations.unshift(selectedUser);
@@ -139,11 +145,13 @@ const Chat = () => {
                                             )}
                                         </div>
                                         <div className="flex justify-between items-center gap-2">
-                                            <p className="text-sm truncate text-slate-500 flex-1">
+                                            <p className={`text-sm truncate flex-1 ${user.unreadCount > 0 ? 'font-bold text-slate-900' : 'text-slate-500'}`}>
                                                 {user.lastMessage || 'Start a conversation'}
                                             </p>
-                                            {user.read === false && (
-                                                <div className="w-2.5 h-2.5 bg-primary rounded-full shrink-0 animate-pulse"></div>
+                                            {user.unreadCount > 0 && (
+                                                <div className="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                                    {user.unreadCount}
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -198,7 +206,21 @@ const Chat = () => {
                                                         ? 'bg-primary text-white rounded-tr-none' 
                                                         : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none'
                                                 }`}>
-                                                    <p className="text-sm">{msg.content}</p>
+                                                    <div className="text-sm break-words">
+                                                        {msg.content.split(/(https?:\/\/[^\s]+)/g).map((part, i) => (
+                                                            part.match(/https?:\/\/[^\s]+/) ? (
+                                                                <a 
+                                                                    key={i} 
+                                                                    href={part} 
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer" 
+                                                                    className={`underline hover:opacity-80 ${isMyMessage ? 'text-blue-100' : 'text-primary'}`}
+                                                                >
+                                                                    {part}
+                                                                </a>
+                                                            ) : part
+                                                        ))}
+                                                    </div>
                                                     <p className={`text-[10px] mt-1 text-right ${isMyMessage ? 'text-blue-100' : 'text-slate-400'}`}>
                                                         {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                                     </p>
