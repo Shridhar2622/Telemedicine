@@ -45,7 +45,7 @@ function AdminLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/admin/login", {
+      const res = await fetch("http://localhost:5000/api/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,11 +63,11 @@ function AdminLogin() {
 
       // Save token & user
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user)); 
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       // Redirect to Admin Dashboard
       navigate("/admin/dashboard");
-      
+
     } catch (error) {
       console.log("Login error:", error);
       setBackendError("Server error. Please try again later.");
@@ -166,7 +166,7 @@ function AdminLogin() {
                 ⚠️ {backendError}
               </div>
             )}
-           
+
           </form>
         </div>
       </div>

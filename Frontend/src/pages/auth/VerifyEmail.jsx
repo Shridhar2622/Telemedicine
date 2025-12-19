@@ -16,7 +16,7 @@ function VerifyEmail() {
   useEffect(() => {
     async function sendOtp() {
       try {
-        await fetch("http://localhost:3000/api/auth/verifyEmail", {
+        await fetch("http://localhost:5000/api/auth/verifyEmail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -57,7 +57,7 @@ function VerifyEmail() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/verifyOTP", {
+      const res = await fetch("http://localhost:5000/api/auth/verifyOTP", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ otp, email }),
@@ -89,7 +89,7 @@ function VerifyEmail() {
     return (
       <div className="h-screen w-full flex justify-center items-center bg-gradient-to-br from-indigo-200 to-blue-300">
         <div className="text-center flex flex-col items-center gap-3">
-          
+
           <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
 
           <h2 className="text-xl font-semibold text-indigo-700">

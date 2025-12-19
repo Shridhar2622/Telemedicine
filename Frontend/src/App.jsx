@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import Dashboard from "./Dashboard.jsx";
 import Signuppage from "./pages/auth/Signuppage.jsx";
 import Loginpage from "./pages/auth/Loginpage.jsx";
 import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
@@ -25,7 +26,7 @@ function App() {
     <div className="min-h-screen bg-blue-50 transition-colors duration-300">
       
         <Routes>
-          <Route path="/" element={<Navigate to="/signup" />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/signup" element={<Signuppage />} />
           <Route path="/login" element={<Loginpage />} />
           <Route path="/verifyemail" element={<VerifyEmail />} />

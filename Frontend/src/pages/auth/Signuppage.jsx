@@ -66,7 +66,7 @@ function Signuppage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/register", {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,7 +123,7 @@ function Signuppage() {
       {/* RIGHT FORM SECTION */}
       <div className="login-form-section">
         <div className="login-form-container">
-          
+
           {/* Header */}
           <div className="login-header">
             <h2 className="login-title">Create Account</h2>
@@ -141,7 +141,7 @@ function Signuppage() {
 
           {/* FORM */}
           <form className="login-form" onSubmit={handleSubmit}>
-            
+
             {/* Username */}
             <div className="form-group">
               <label className="form-label">UserName</label>

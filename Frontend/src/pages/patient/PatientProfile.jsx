@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import MainLayout from "../../layouts/MainLayout";
 
 function PatientProfile() {
-  
+
   const [user, setUser] = useState({
     userName: "",
     fullName: "",
@@ -27,7 +27,7 @@ function PatientProfile() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/user/me", {
+      const res = await fetch("http://localhost:5000/api/user/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -51,7 +51,7 @@ function PatientProfile() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/user/updateProfile", {
+      const res = await fetch("http://localhost:5000/api/user/updateProfile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +88,7 @@ function PatientProfile() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/user/updatePassword", {
+      const res = await fetch("http://localhost:5000/api/user/updatePassword", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -123,18 +123,17 @@ function PatientProfile() {
         </div>
 
         {message.text && (
-          <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
-            message.type === 'success' 
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+          <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.type === 'success'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
               : 'bg-red-50 text-red-700 border border-red-200'
-          }`}>
+            }`}>
             <span>{message.type === 'success' ? '✅' : '⚠️'}</span>
             {message.text}
           </div>
         )}
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row min-h-[500px]">
-          
+
           <div className="w-full md:w-64 bg-slate-50/50 border-r border-slate-200 p-4 flex flex-col gap-2">
             {[
               { id: "details", label: "Overview", icon: "👤" },
@@ -143,11 +142,10 @@ function PatientProfile() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium ${
-                  activeTab === tab.id
+                className={`text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium ${activeTab === tab.id
                     ? "bg-white text-primary shadow-sm ring-1 ring-slate-200"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 <span className="text-xl">{tab.icon}</span>
                 <span>{tab.label}</span>
@@ -156,12 +154,12 @@ function PatientProfile() {
           </div>
 
           <div className="flex-1 p-8">
-            
+
             {activeTab === "details" && (
               <form onSubmit={handleUpdateProfile} className="space-y-8 max-w-2xl">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 mb-6 pb-2 border-b border-slate-100">Personal Information</h2>
-                  
+
                   <div className="grid grid-cols-1 gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -187,16 +185,16 @@ function PatientProfile() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-slate-700 font-medium text-sm">Email Address</label>
-                        <input
-                          type="email"
-                          value={user.email}
-                          onChange={(e) => setUser({ ...user, email: e.target.value })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-slate-400"
-                        />
-                        <p className="text-xs text-slate-500">
-                          Changing your email will require re-verification.
-                        </p>
+                      <label className="text-slate-700 font-medium text-sm">Email Address</label>
+                      <input
+                        type="email"
+                        value={user.email}
+                        onChange={(e) => setUser({ ...user, email: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-slate-400"
+                      />
+                      <p className="text-xs text-slate-500">
+                        Changing your email will require re-verification.
+                      </p>
                     </div>
 
                     <div className="pt-4 flex justify-end">
@@ -217,7 +215,7 @@ function PatientProfile() {
               <form onSubmit={handleUpdatePassword} className="space-y-8 max-w-xl">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 mb-6 pb-2 border-b border-slate-100">Password & Security</h2>
-                  
+
                   <div className="space-y-5">
                     <div className="space-y-2">
                       <label className="text-slate-700 font-medium text-sm">Current Password</label>
