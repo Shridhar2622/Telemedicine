@@ -12,6 +12,8 @@ DB();
 const app = express();
 const server = http.createServer(app);
 const io = initSocket(server);
+const authMiddleware = require("./middlewares/authMiddleware");
+
 const PORT = process.env.PORT || 5000;
 
 // Middlewares
@@ -39,6 +41,9 @@ app.use("/api/appointments", appointmentRoute);
 app.use("/api/prescription", prescriptionRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/messages", messageRoute);
+const reviewController = require("./controllers/reviewController");
+app.post("/api/reviews", authMiddleware, reviewController.addReview);
+app.get("/api/reviews/:doctorId", reviewController.getReviews);
 
 app.use((err, req, res, next) => {
   console.error("🔥 Server Error:", err);

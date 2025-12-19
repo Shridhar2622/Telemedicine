@@ -20,8 +20,18 @@ const sendMessage = async (req, res) => {
         try {
             const io = getIO();
             io.to(receiverId).emit("receive_message", newMessage);
-            // Also emit to sender (for multi-device sync or just confirming sent)
-            // But frontend usually updates optimistically or via response.
+            
+            // Notification for the receiver
+            io.to(receiverId).emit("new_notification", {
+                type: "message",
+                message: `New message from ${req.user.userName || "User"}`, 
+                data: newMessage,
+                senderId: req.user.id,
+                senderName: req.user.userName,
+                isRead: false,
+                createdAt: new Date()
+            });
+
         } catch (err) {
             console.error("Socket emit failed:", err.message);
         }

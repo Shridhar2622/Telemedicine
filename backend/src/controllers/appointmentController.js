@@ -1,6 +1,7 @@
   const Appointment = require("../models/Appointment");
   const User = require("../models/User");
   const Doctor = require("../models/Doctor");
+  const { getIO } = require("../socket");
 
 
   // 📌 BOOK APPOINTMENT (Patient)
@@ -52,6 +53,20 @@
         status: "pending",
       });
 
+      // Notify Doctor
+      try {
+          const io = getIO();
+          io.to(doctor.userId.toString()).emit("new_notification", {
+              type: "appointment",
+              message: `New appointment request from a patient`,
+              data: appointment,
+              isRead: false,
+              createdAt: new Date()
+          });
+      } catch (err) {
+          console.error("Socket emit failed:", err.message);
+      }
+
       return res.status(201).json({
         message: "Appointment booked successfully",
         appointment,
@@ -80,7 +95,7 @@
       const appts = await Appointment.find({ patient: patientId })
         .populate({
           path: "doctor",
-          select: "name specialization consultationFee"
+          select: "name specialization consultationFee userId"
         });
         
       console.log(`✅ Found ${appts.length} appointments`);
@@ -155,6 +170,42 @@
       
       await appt.save();
 
+      const io = getIO();
+
+      // 1. Send Chat Message if Meeting Link exists
+      if (status === 'accepted' && meetingRoom) {
+          try {
+              const Message = require("../models/Message"); // Lazy load to avoid circular deps if any
+              
+              // Doctor sends message to Patient
+              const systemMsg = await Message.create({
+                  sender: doctorProfile.userId, // The Doctor User ID
+                  receiver: appt.patient,       // The Patient User ID
+                  content: `Here is the meeting link for our appointment: ${meetingRoom}`,
+                  timestamp: new Date()
+              });
+
+              // Emit Receive Message to Patient
+              io.to(appt.patient.toString()).emit("receive_message", systemMsg);
+              
+          } catch (msgErr) {
+              console.error("Failed to send auto-chat message:", msgErr);
+          }
+      }
+
+      // 2. Notification (Existing Logic)
+      try {
+          io.to(appt.patient.toString()).emit("new_notification", {
+              type: "appointment", // or 'message' if you prefer, but keep 'appointment' for status update
+              message: `Your appointment has been ${status}`,
+              data: appt,
+              isRead: false,
+              createdAt: new Date()
+          });
+      } catch (err) {
+          console.error("Socket emit failed:", err.message);
+      }
+
       return res.status(200).json({
         success: true,
         message: `Appointment ${status}`,
@@ -185,6 +236,25 @@
 
       appt.status = "cancelled";
       await appt.save();
+
+
+
+      // Notify Doctor
+      try {
+          const doctorDoc = await Doctor.findById(appt.doctor);
+          if (doctorDoc && doctorDoc.userId) {
+              const io = getIO();
+              io.to(doctorDoc.userId.toString()).emit("new_notification", {
+                  type: "appointment",
+                  message: `Appointment cancelled by patient`,
+                  data: appt,
+                  isRead: false,
+                  createdAt: new Date()
+              });
+          }
+      } catch (err) {
+          console.error("Socket emit failed:", err.message);
+      }
 
       return res.status(200).json({
         success: true,
