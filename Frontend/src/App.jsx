@@ -25,7 +25,7 @@ function App() {
     <div className="min-h-screen bg-blue-50 transition-colors duration-300">
       
         <Routes>
-          <Route path="/" element={<Navigate to="/signup" />} />
+          <Route path="/" element={<PatientPage />} />
           <Route path="/signup" element={<Signuppage />} />
           <Route path="/login" element={<Loginpage />} />
           <Route path="/verifyemail" element={<VerifyEmail />} />
