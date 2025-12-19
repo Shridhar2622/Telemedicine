@@ -1,0 +1,63 @@
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { io } from 'socket.io-client';
+
+const SocketContext = createContext();
+
+export const useSocket = () => {
+    return useContext(SocketContext);
+};
+
+export const SocketProvider = ({ children }) => {
+    const [socket, setSocket] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    // Use a ref to keep track of socket instance to prevent multiple connections
+    const socketRef = useRef(null);
+
+    // Unified user ID check
+    const userId = user.id || user._id;
+
+    useEffect(() => {
+        if (userId && !socketRef.current) {
+            const ENDPOINT = "http://localhost:3000"; 
+            socketRef.current = io(ENDPOINT);
+
+            socketRef.current.emit("join_room", userId);
+
+            socketRef.current.on("new_notification", (notification) => {
+                setNotifications((prev) => [notification, ...prev]);
+                setUnreadCount((prev) => prev + 1);
+            });
+            
+            socketRef.current.on("connect_error", (err) => {
+                console.error("Socket connection error:", err.message);
+            });
+            
+            socketRef.current.on("connect", () => {
+                console.log("Socket connected successfully:", socketRef.current.id);
+            });
+
+            setSocket(socketRef.current);
+        }
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
+        };
+    }, [userId]);
+
+    const markAllAsRead = () => {
+        setUnreadCount(0);
+        setNotifications((prev) => prev.map(n => ({ ...n, isRead: true })));
+    };
+
+    return (
+        <SocketContext.Provider value={{ socket, notifications, unreadCount, markAllAsRead, setNotifications }}>
+            {children}
+        </SocketContext.Provider>
+    );
+};

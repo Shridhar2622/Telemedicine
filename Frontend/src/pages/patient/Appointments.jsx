@@ -10,8 +10,33 @@ const Appointments = () => {
     const [filter, setFilter] = useState('upcoming'); // upcoming, completed, cancelled
     const navigate = useNavigate();
     const [cancellingId, setCancellingId] = useState(null);
+    const [selectedReviewAppt, setSelectedReviewAppt] = useState(null);
+    const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+    const [toast, setToast] = useState({ message: '', type: '' }); // 'success' or 'error'
 
-    const appointments = data?.appointments || [];
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast({ message: '', type: '' }), 3000);
+    };
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedReviewAppt) return;
+        try {
+            await api.post('/reviews', {
+                doctorId: selectedReviewAppt.doctor._id,
+                appointmentId: selectedReviewAppt._id,
+                rating: parseInt(reviewForm.rating),
+                comment: reviewForm.comment
+            });
+            showToast('Review submitted successfully!', 'success');
+            setSelectedReviewAppt(null); // Close modal
+            setReviewForm({ rating: 5, comment: '' }); // Reset form
+        } catch (err) {
+            console.error(err);
+            showToast(err.response?.data?.message || 'Failed to submit review', 'error');
+        }
+    };
 
     const handleCancel = async (appointmentId) => {
         if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
@@ -19,14 +44,17 @@ const Appointments = () => {
         setCancellingId(appointmentId);
         try {
             await api.patch('/appointments/cancel', { appointmentId });
+            showToast('Appointment cancelled successfully', 'success');
             refetch(); // Refresh list
         } catch (error) {
-            alert('Failed to cancel appointment');
+            showToast('Failed to cancel appointment', 'error');
             console.error(error);
         } finally {
             setCancellingId(null);
         }
     };
+
+    const appointments = data?.appointments || [];
 
     const filteredAppointments = appointments.filter(appt => {
         if (filter === 'upcoming') return appt.status === 'scheduled' || appt.status === 'pending' || appt.status === 'accepted';
@@ -56,6 +84,17 @@ const Appointments = () => {
 
     return (
         <MainLayout>
+            {/* Toast Notification */}
+            {toast.message && (
+                <div className={`fixed top-4 right-4 z-[60] px-6 py-3 rounded-xl shadow-lg animate-fade-in flex items-center gap-2 ${
+                    toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+                }`}>
+                    <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
+                    <span className="font-medium">{toast.message}</span>
+                    <button onClick={() => setToast({ message: '', type: '' })} className="ml-2 hover:opacity-80">✕</button>
+                </div>
+            )}
+
             <div className="mb-8 animate-slide-up">
                 <h1 className="text-3xl font-bold text-slate-900">My Appointments</h1>
                 <p className="text-slate-500 mt-2">Manage and view your appointment history.</p>
@@ -123,20 +162,45 @@ const Appointments = () => {
                                         {filter === 'upcoming' && appt.status !== 'cancelled' && (
                                             <>
                                                 {(appt.status === 'scheduled') && (
-                                                    <button 
-                                                        onClick={() => navigate('/patient/messages', { 
-                                                            state: { 
-                                                                userId: appt.doctor?._id || appt.doctor?.userId, 
-                                                                userName: appt.doctor?.name || appt.doctor?.userName,
-                                                                role: 'Doctor'
-                                                            } 
-                                                        })}
-                                                        className="text-xs font-semibold text-white bg-indigo-500 hover:bg-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm"
+                                                    <>
+                                                        {appt.meetingRoom && (
+                                                            <a 
+                                                                href={appt.meetingRoom}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm"
+                                                            >
+                                                                📹 Join
+                                                            </a>
+                                                        )}
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); navigate('/patient/messages', { 
+                                                                state: { 
+                                                                    userId: appt.doctor?._id || appt.doctor?.userId, 
+                                                                    userName: appt.doctor?.name || appt.doctor?.userName,
+                                                                    role: 'Doctor'
+                                                                } 
+                                                            })}}
+                                                            className="text-xs font-semibold text-white bg-indigo-500 hover:bg-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                            </svg>
+                                                            Chat
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {/* Review Button for Accepted/Completed appointments */}
+                                                {(appt.status === 'accepted' || appt.status === 'completed') && (
+                                                    <button
+                                                        onClick={() => setSelectedReviewAppt(appt)}
+                                                        className="text-xs font-semibold text-white bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm"
                                                     >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                         </svg>
-                                                        Chat
+                                                        Review
                                                     </button>
                                                 )}
                                                 <button 
@@ -174,6 +238,51 @@ const Appointments = () => {
                     </div>
                 )}
             </div>
+    {selectedReviewAppt && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
+                    <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-scale-up">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-bold text-slate-900">Rate Dr. {selectedReviewAppt.doctor?.name}</h3>
+                            <button onClick={() => setSelectedReviewAppt(null)} className="text-slate-400 hover:text-slate-600">
+                                ✕
+                            </button>
+                        </div>
+                        <form onSubmit={handleReviewSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Rating</label>
+                                <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                                            className={`text-2xl transition-transform hover:scale-110 ${star <= reviewForm.rating ? 'text-yellow-400' : 'text-slate-200'}`}
+                                        >
+                                            ★
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Your Feedback</label>
+                                <textarea
+                                    required
+                                    value={reviewForm.comment}
+                                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                                    className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none h-32"
+                                    placeholder="Share your experience..."
+                                ></textarea>
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-hover transition-colors shadow-lg shadow-primary/30"
+                            >
+                                Submit Review
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </MainLayout>
     );
 };

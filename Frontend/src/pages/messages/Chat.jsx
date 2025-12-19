@@ -3,10 +3,8 @@ import MainLayout from '../../layouts/MainLayout';
 import api from '../../utils/api';
 import useFetchData from '../../hooks/useFetchData';
 import { useLocation } from 'react-router-dom';
-import { io } from 'socket.io-client';
+import { useSocket } from '../../context/SocketContext'; // Import context
 import PrescriptionModal from '../../components/PrescriptionModal';
-
-const ENDPOINT = "http://localhost:5000"; // Should be env var in production
 
 const Chat = () => {
     const { data: conversationData, loading: loadingConversations, refetch: refetchConversations } = useFetchData('/messages/conversations');
@@ -19,56 +17,33 @@ const Chat = () => {
     const messagesEndRef = useRef(null);
     const location = useLocation();
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const socketRef = useRef();
-
-    // Initialize Socket
-    useEffect(() => {
-        socketRef.current = io(ENDPOINT);
-        
-        // Join my room
-        if (currentUser._id) {
-            socketRef.current.emit("join_room", currentUser._id || currentUser.id);
-        }
-
-        // Listen for incoming messages
-        socketRef.current.on("receive_message", (message) => {
-            // Only append if the message belongs to the current open chat
-            // OR if we want to show a notification badge (simplifying here)
-            setMessages((prevMessages) => {
-                 // Check if this message belongs to the currently viewed conversation
-                 // We don't have access to 'selectedUser' state easily inside this closure unless we use a ref or check message content
-                 // Actually the closure 'selectedUser' might be stale.
-                 // Better pattern: Check message.sender === selectedUserRef.current._id
-                 return [...prevMessages, message];
-            });
-            
-            // Also refresh conversation list to show new snippet
-            refetchConversations();
-        });
-
-        return () => {
-            socketRef.current.disconnect();
-        };
-    }, []);
-
-    // Handling message filtering: The above 'receive_message' appends blindly.
-    // We need to ensure we only show it if it matches the current chat.
-    // Let's refine the socket listener logic by using a useEffect that depends on selectedUser.
     
+    // Use global socket
+    const { socket } = useSocket();
+
+    // Listen for incoming messages
     useEffect(() => {
-        if (!socketRef.current) return;
+        if (!socket) return;
 
         const handleNewMessage = (message) => {
-            if (selectedUser && (message.sender === selectedUser._id || message.reciever === selectedUser._id)) {
+            // If the message is relevant to the currently selected user (either sent by them or sent by me from another device)
+            // Note: message.reciever vs receiver typo check. Backend model says "receiver", but frontend check was "reciever".
+            // Backend Controller: receiver: receiverId.
+            // Let's assume standard "receiver".
+            // In Chat.jsx formerly: message.sender === selectedUser._id || message.reciever === ...
+            if (selectedUser && (message.sender === selectedUser._id || message.receiver === selectedUser._id)) {
                  setMessages((prev) => [...prev, message]);
             }
             refetchConversations();
         };
 
-        socketRef.current.off("receive_message");
-        socketRef.current.on("receive_message", handleNewMessage);
+        socket.on("receive_message", handleNewMessage);
 
-    }, [selectedUser]); // Re-bind when user changes
+        return () => {
+            socket.off("receive_message", handleNewMessage);
+        };
+
+    }, [socket, selectedUser]); // Re-bind when socket or selectedUser changes
 
     // Check if we navigated here with a specific user to chat with
     useEffect(() => {

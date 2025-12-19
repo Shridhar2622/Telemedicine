@@ -14,29 +14,30 @@ const Sidebar = () => {
   const role = user.role || 'Patient'; // Default to Patient if not found
 
   const patientLinks = [
-    { name: 'Dashboard', path: '/patient/dashboard', color: 'bg-blue-500' },
-    { name: 'Appointments', path: '/patient/appointments', color: 'bg-emerald-500' },
-    { name: 'Prescriptions', path: '/patient/prescriptions', color: 'bg-purple-500' },
-    { name: 'Find Doctor', path: '/patient/find-doctors', color: 'bg-indigo-500' },
-    { name: 'Messages', path: '/patient/messages', color: 'bg-pink-500' },
-    { name: 'Profile', path: '/patient/profile', color: 'bg-orange-500' },
+    { name: 'Dashboard', path: '/patient/dashboard', icon: '/Dashboard.png', color: 'bg-blue-500' },
+    { name: 'Appointments', path: '/patient/appointments', icon: '/Appointment.png', color: 'bg-emerald-500' },
+    { name: 'Prescriptions', path: '/patient/prescriptions', icon: '/Prescriptions.png', color: 'bg-purple-500' },
+    { name: 'Find Doctor', path: '/patient/find-doctors', icon: '/Doctor.png', color: 'bg-indigo-500' },
+    { name: 'Messages', path: '/patient/messages', icon: '/Chat.png', color: 'bg-pink-500' },
+    { name: 'Profile', path: '/patient/profile', icon: '/Profile.png', color: 'bg-orange-500' },
   ];
 
   const doctorLinks = [
-    { name: 'Dashboard', path: '/doctor/dashboard', color: 'bg-blue-500' },
-    { name: 'My Schedule', path: '/doctor/schedule', color: 'bg-emerald-500' },
-    { name: 'My Patients', path: '/doctor/patients', color: 'bg-purple-500' },
-    { name: 'Appointments', path: '/doctor/appointments', color: 'bg-indigo-500' },
-    { name: 'Doctor Directory', path: '/patient/find-doctors', color: 'bg-teal-500' },
-    { name: 'Messages', path: '/doctor/messages', color: 'bg-pink-500' },
-    { name: 'Profile', path: '/doctor/profile', color: 'bg-orange-500' },
+    { name: 'Dashboard', path: '/doctor/dashboard', icon: '/Dashboard.png', color: 'bg-blue-500' },
+    { name: 'My Schedule', path: '/doctor/schedule', icon: '/Schedule.png', color: 'bg-emerald-500' },
+    { name: 'My Patients', path: '/doctor/patients', icon: '/User.png', color: 'bg-purple-500' },
+    { name: 'Appointments', path: '/doctor/appointments', icon: '/Appointment.png', color: 'bg-indigo-500' },
+    { name: 'Doctor Directory', path: '/patient/find-doctors', icon: '/Doctor.png', color: 'bg-teal-500' },
+    { name: 'Messages', path: '/doctor/messages', icon: '/Chat.png', color: 'bg-pink-500' },
+    { name: 'Profile', path: '/doctor/profile', icon: '/Profile.png', color: 'bg-orange-500' },
   ];
 
   const navItems = role === 'Doctor' ? doctorLinks : patientLinks;
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 h-screen fixed left-0 top-0 flex flex-col z-10 hidden md:flex">
-      <div className="p-6 border-b border-slate-100">
+      <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+        <img src="/Logo.png" alt="TeleMed Logo" className="w-8 h-8 object-contain" />
         <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
           TeleMed
           <span className="block text-xs font-normal text-slate-400 mt-1 uppercase tracking-wider">{role} Portal</span>
@@ -56,7 +57,11 @@ const Sidebar = () => {
               }`
             }
           >
-            <span className={`w-3 h-3 mr-4 rounded-full ${item.color} shadow-sm group-hover:scale-110 transition-transform`} />
+            {item.icon ? (
+                <img src={item.icon} alt={item.name} className="w-9 h-9 mr-4 object-contain opacity-75 group-hover:opacity-100 transition-opacity" />
+            ) : (
+                <span className={`w-3 h-3 mr-4 rounded-full ${item.color} shadow-sm group-hover:scale-110 transition-transform`} />
+            )}
             {item.name}
           </NavLink>
         ))}

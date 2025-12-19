@@ -114,6 +114,12 @@ const PublicDoctorProfile = () => {
                                 </div>
                             </div>
                         </Card>
+
+                        {/* Reviews Section */}
+                        <div className="mt-8 pt-8 border-t border-slate-100">
+                            <h2 className="text-xl font-bold text-slate-800 mb-6">Patient Reviews</h2>
+                            <ReviewsList doctorId={id} />
+                        </div>
                     </div>
 
                     {/* Right: Availability Preview */}
@@ -166,6 +172,50 @@ const PublicDoctorProfile = () => {
                 />
             )}
         </MainLayout>
+    );
+};
+
+// Start Subcomponent for Reviews List
+const ReviewsList = ({ doctorId }) => {
+    const { data, loading } = useFetchData(`/reviews/${doctorId}`);
+    const reviews = data?.data || [];
+
+    if (loading) return <div className="text-center py-4 text-slate-400">Loading reviews...</div>;
+
+    if (reviews.length === 0) {
+        return (
+            <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <p className="text-slate-500">No reviews yet.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            {reviews.map((review) => (
+                <div key={review._id} className="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                                {review.userName?.charAt(0) || 'U'}
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-slate-900">{review.userName || 'Anonymous Patient'}</h4>
+                                <p className="text-xs text-slate-400">{new Date(review.createdAt).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div className="flex text-yellow-400 text-sm">
+                            {[...Array(5)].map((_, i) => (
+                                <span key={i}>{i < review.rating ? '★' : '☆'}</span>
+                            ))}
+                        </div>
+                    </div>
+                    <p className="text-slate-600 text-sm leading-relaxed ml-13 pl-13 mt-2">
+                        {review.comment}
+                    </p>
+                </div>
+            ))}
+        </div>
     );
 };
 
