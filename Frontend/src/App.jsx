@@ -12,6 +12,7 @@ import FindDoctors from "./pages/patient/FindDoctors.jsx";
 import Prescriptions from "./pages/patient/Prescriptions.jsx";
 import PublicDoctorProfile from "./pages/patient/PublicDoctorProfile.jsx";
 import PatientProfile from "./pages/patient/PatientProfile.jsx";
+import ContactUs from "./pages/patient/ContactUs.jsx";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DoctorSchedule from "./pages/doctor/DoctorSchedule.jsx";
@@ -28,6 +29,7 @@ import AdminDoctors from "./pages/admin/AdminDoctors";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminMessages from "./pages/admin/AdminMessages";
 
 import { Toaster } from 'react-hot-toast';
 
@@ -50,6 +52,7 @@ function App() {
           <Route path="/patient/prescriptions" element={<Prescriptions />} />
           <Route path="/patient/messages" element={<Chat />} />
           <Route path="/patient/profile" element={<PatientProfile />} />
+          <Route path="/patient/contact" element={<ContactUs />} />
           <Route path="/doctor-profile/:id" element={<PublicDoctorProfile />} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/doctor/schedule" element={<DoctorSchedule />} />
@@ -67,6 +70,7 @@ function App() {
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/coupons" element={<AdminCoupons />} />
+          <Route path="/admin/messages-contact" element={<AdminMessages />} />
         </Routes>
     </div>
   );

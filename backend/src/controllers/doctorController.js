@@ -289,7 +289,7 @@ const getDoctorPayments = async (req, res) => {
 
         const appointments = await Appointment.find({
             doctor: doctor._id,
-            status: { $in: ['accepted', 'completed'] }, // Assuming only these statuses mean validated payment
+            status: { $in: ['pending', 'accepted', 'completed'] }, // Include pending as they are paid
             'paymentInfo.amount': { $exists: true }
         }).populate('patient', 'userName email');
 

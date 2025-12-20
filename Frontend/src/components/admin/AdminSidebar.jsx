@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, UserPlus, LogOut, Ticket } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, LogOut, Ticket, Mail } from 'lucide-react';
 
 const AdminSidebar = () => {
     const navigate = useNavigate();
@@ -16,6 +16,7 @@ const AdminSidebar = () => {
         { path: '/admin/users', label: 'Users', icon: Users },
         { path: '/admin/doctors', label: 'Doctors', icon: UserPlus },
         { path: '/admin/coupons', label: 'Coupons', icon: Ticket },
+        { path: '/admin/messages-contact', label: 'Messages', icon: Mail },
     ];
 
     return (

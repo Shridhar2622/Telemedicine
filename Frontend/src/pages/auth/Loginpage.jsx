@@ -65,7 +65,8 @@ function Loginpage() {
       }
 
       // ⭐ ROLE CHECK (MAIN CONDITION)
-      if (data.user.role !== role) {
+      // Allow Admin to login even if they selected Patient/Doctor
+      if (data.user.role !== role && data.user.role !== 'Admin') {
         setBackendError("You are not authorized for this role.");
         return;
       }
@@ -75,8 +76,13 @@ function Loginpage() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // ⭐ REDIRECT based on role
-      if (role === "Patient") navigate("/patient/dashboard");
-      if (role === "Doctor") navigate("/doctor/dashboard");
+      if (data.user.role === 'Admin') {
+        navigate("/admin/dashboard");
+      } else if (role === "Patient") {
+        navigate("/patient/dashboard");
+      } else if (role === "Doctor") {
+        navigate("/doctor/dashboard");
+      }
     } catch (error) {
       console.log("Login error:", error);
       setBackendError("Server error. Please try again later.");
