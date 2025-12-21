@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config";
 import CardSwap, { Card } from "../../components/ui/CardSwap"
 import doctor1 from "../../assets/doctor1.jpg";
 import doctor2 from "../../assets/doctor2.jpg";
@@ -45,7 +46,7 @@ function AdminLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/admin/login", {
+      const res = await fetch(`${API_BASE_URL}/admin/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { API_BASE_URL } from "../../config";
 
 function AuthSuccess() {
   const [searchParams] = useSearchParams();
@@ -15,7 +16,7 @@ function AuthSuccess() {
       // Use a timeout to ensure storage is set or fetch user profile immediately?
       // Better: Fetch user profile to know role.
       // But for simplicity/speed request, we'll try to fetch /me
-      fetch("http://localhost:5000/api/auth/me", {
+      fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
             "Authorization": `Bearer ${token}`
         }

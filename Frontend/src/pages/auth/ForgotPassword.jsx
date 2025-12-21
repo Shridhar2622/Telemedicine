@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config";
 import Button from "../../components/Button";
 
 function ForgotPassword() {
@@ -31,7 +32,7 @@ function ForgotPassword() {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/auth/forgotPassword",
+        `${API_BASE_URL}/auth/forgotPassword`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -72,7 +73,7 @@ function ForgotPassword() {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/auth/forgotPassword/verifyOTP",
+        `${API_BASE_URL}/auth/forgotPassword/verifyOTP`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

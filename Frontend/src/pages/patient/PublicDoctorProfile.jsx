@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from "../../config";
 import MainLayout from '../../layouts/MainLayout';
 import Card from '../../components/ui/Card';
 import useFetchData from '../../hooks/useFetchData';
@@ -18,7 +19,7 @@ const PublicDoctorProfile = () => {
         const fetchDoctorProfile = async () => {
             try {
                 setLoading(true);
-                const res = await fetch(`http://localhost:5000/api/doctor/${id}`);
+                const res = await fetch(`${API_BASE_URL}/doctor/${id}`);
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
                 }

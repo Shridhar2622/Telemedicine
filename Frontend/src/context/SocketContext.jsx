@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
+import { SOCKET_URL } from "../config";
 
 const SocketContext = createContext();
 
@@ -21,7 +22,7 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (userId && !socketRef.current) {
-            const ENDPOINT = "http://localhost:5000"; 
+            const ENDPOINT = SOCKET_URL; 
             socketRef.current = io(ENDPOINT);
 
 

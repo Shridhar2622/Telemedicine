@@ -3,6 +3,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import StatsCard from '../../components/admin/StatsCard';
 import { Users, UserPlus, Calendar, FileText } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from "../../config";
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
@@ -19,7 +20,7 @@ const AdminDashboard = () => {
                 const token = localStorage.getItem('token');
                 if (!token) return;
 
-                const response = await axios.get('http://localhost:5000/api/admin/stats', {
+                const response = await axios.get(`${API_BASE_URL}/admin/stats`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 

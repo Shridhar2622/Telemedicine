@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config";
 import Button from "../../components/Button";
 
 function VerifyEmail() {
@@ -16,7 +18,7 @@ function VerifyEmail() {
   useEffect(() => {
     async function sendOtp() {
       try {
-        await fetch("http://localhost:5000/api/auth/verifyEmail", {
+        await fetch(`${API_BASE_URL}/auth/verifyEmail`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -57,7 +59,7 @@ function VerifyEmail() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verifyOTP", {
+      const res = await fetch(`${API_BASE_URL}/auth/verifyOTP`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ otp, email }),

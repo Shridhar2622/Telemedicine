@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { API_BASE_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
 import CardSwap, { Card } from "../../components/ui/CardSwap"
 import doctor1 from "../../assets/doctor1.jpg";
@@ -67,7 +69,7 @@ function Signuppage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -242,7 +244,7 @@ function Signuppage() {
             <div className="mt-6">
               <button
                 type="button"
-                onClick={() => window.location.href = "http://localhost:5000/api/auth/google"}
+                onClick={() => window.location.href = `${API_BASE_URL}/auth/google`}
                 className="w-full flex justify-center items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
               >
                 <img className="h-5 w-5" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />

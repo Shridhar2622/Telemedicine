@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config";
 import MainLayout from "../../layouts/MainLayout";
 
 function PatientProfile() {
@@ -27,7 +29,7 @@ function PatientProfile() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/auth/me", {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
