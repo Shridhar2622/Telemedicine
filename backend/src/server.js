@@ -41,6 +41,7 @@ const adminRoute = require("./routes/adminRoutes");
 const messageRoute = require("./routes/messageRoutes");
 const couponRoute = require("./routes/couponRoutes");
 const paymentRoute = require("./routes/paymentRoutes");
+const contactRoute = require("./routes/contactRoutes");
 
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
@@ -51,6 +52,7 @@ app.use("/api/admin", adminRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/coupons", couponRoute);
 app.use("/api/payment", paymentRoute);
+app.use("/api/contact", contactRoute);
 const reviewController = require("./controllers/reviewController");
 app.post("/api/reviews", authMiddleware, reviewController.addReview);
 app.get("/api/reviews/:doctorId", reviewController.getReviews);

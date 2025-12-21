@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
 import CardSwap, { Card } from "../../components/ui/CardSwap"
 import doctor1 from "../../assets/doctor1.jpg";
 import doctor2 from "../../assets/doctor2.jpg";
 import doctor3 from "../../assets/doctor3.jpg";
+import PublicNavbar from "../../components/PublicNavbar";
 import "./LoginPage.css";
 
 function Loginpage() {
@@ -13,6 +14,21 @@ function Loginpage() {
   const [role, setRole] = useState("Patient"); // ⭐ DEFAULT ROLE
 
   const navigate = useNavigate();
+  // Parse query params
+  const [searchParams] = useState(new URLSearchParams(window.location.search));
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error === "blocked") {
+      setBackendError(
+        <span>
+          Your account is blocked. <a href="/contact" className="underline font-bold hover:text-red-700">Contact us</a> for support.
+        </span>
+      );
+    } else if (error === "auth_failed") {
+      setBackendError("Google Authentication failed. Please try again.");
+    }
+  }, [searchParams]);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -60,12 +76,24 @@ function Loginpage() {
 
       // Backend validation failed
       if (!res.ok) {
-        setBackendError(data.message || "Login failed, please try again.");
+        const errorMsg = data.message || "Login failed, please try again.";
+        
+        // Customhandling for blocked users to show clickable link
+        if (res.status === 403 && (errorMsg.includes("blocked") || errorMsg.includes("contact admin"))) {
+          setBackendError(
+            <span>
+              Your account is blocked. <a href="/contact" className="underline font-bold hover:text-red-700">Contact us</a> for support.
+            </span>
+          );
+        } else {
+          setBackendError(errorMsg);
+        }
         return;
       }
 
       // ⭐ ROLE CHECK (MAIN CONDITION)
-      if (data.user.role !== role) {
+      // Allow Admin to login even if they selected Patient/Doctor
+      if (data.user.role !== role && data.user.role !== 'Admin') {
         setBackendError("You are not authorized for this role.");
         return;
       }
@@ -75,8 +103,13 @@ function Loginpage() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // ⭐ REDIRECT based on role
-      if (role === "Patient") navigate("/patient/dashboard");
-      if (role === "Doctor") navigate("/doctor/dashboard");
+      if (data.user.role === 'Admin') {
+        navigate("/admin/dashboard");
+      } else if (role === "Patient") {
+        navigate("/patient/dashboard");
+      } else if (role === "Doctor") {
+        navigate("/doctor/dashboard");
+      }
     } catch (error) {
       console.log("Login error:", error);
       setBackendError("Server error. Please try again later.");
@@ -85,7 +118,10 @@ function Loginpage() {
   };
 
   return (
-    <div className="login-container">
+    <div className="login-container relative">
+      <div className="absolute top-0 w-full z-50">
+        <PublicNavbar />
+      </div>
 
       {/* LEFT POSTER SECTION */}
       <div className="login-showcase">
@@ -113,8 +149,8 @@ function Loginpage() {
       </div>
 
       {/* RIGHT FORM SECTION */}
-      <div className="login-form-section">
-        <div className="login-form-container">
+      <div className="login-form-section pt-24 md:pt-0"> {/* Mobile padding */}
+        <div className="login-form-container mt-20 md:mt-0"> {/* Extra margin for safety */}
 
           {/* Header */}
           <div className="login-header">
@@ -205,8 +241,8 @@ function Loginpage() {
 
             {/* Backend error */}
             {backendError && (
-              <div className="backend-error">
-                ⚠️ {backendError}
+              <div className="backend-error animate-pulse text-center font-semibold">
+                {backendError}
               </div>
             )}
 

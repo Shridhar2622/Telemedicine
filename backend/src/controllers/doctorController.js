@@ -1,5 +1,6 @@
 const Doctor = require("../models/Doctor");
 const User = require("../models/User");
+const Appointment = require("../models/Appointment");
 
 
 const createOrUpdateDoctorProfile = async (req, res) => {
@@ -289,17 +290,24 @@ const getDoctorPayments = async (req, res) => {
 
         const appointments = await Appointment.find({
             doctor: doctor._id,
-            status: { $in: ['accepted', 'completed'] }, // Assuming only these statuses mean validated payment
+            status: { $in: ['pending', 'accepted', 'completed'] }, // Include pending as they are paid
             'paymentInfo.amount': { $exists: true }
-        }).populate('patient', 'userName email');
+        }).populate('patient', 'userName email fullName');
 
         let totalEarnings = 0;
         const transactions = appointments.map(appt => {
             const amount = appt.paymentInfo.amount || 0;
             totalEarnings += amount;
+            
+            let displayName = 'Unknown';
+            if (appt.patient) {
+                // Prefer fullName, fallback to userName
+                displayName = appt.patient.fullName || appt.patient.userName;
+            }
+
             return {
                 id: appt._id,
-                patientName: appt.patient ? appt.patient.userName : 'Unknown',
+                patientName: displayName,
                 date: appt.date,
                 amount: amount,
                 status: 'Paid',

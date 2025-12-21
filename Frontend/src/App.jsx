@@ -12,6 +12,7 @@ import FindDoctors from "./pages/patient/FindDoctors.jsx";
 import Prescriptions from "./pages/patient/Prescriptions.jsx";
 import PublicDoctorProfile from "./pages/patient/PublicDoctorProfile.jsx";
 import PatientProfile from "./pages/patient/PatientProfile.jsx";
+import ContactUs from "./pages/patient/ContactUs.jsx";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DoctorSchedule from "./pages/doctor/DoctorSchedule.jsx";
@@ -28,6 +29,7 @@ import AdminDoctors from "./pages/admin/AdminDoctors";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminMessages from "./pages/admin/AdminMessages";
 
 import { Toaster } from 'react-hot-toast';
 
@@ -38,6 +40,7 @@ function App() {
       
         <Routes>
           <Route path="/" element={<PatientPage />} />
+          <Route path="/contact" element={<ContactUs />} />
           <Route path="/signup" element={<Signuppage />} />
           <Route path="/login" element={<Loginpage />} />
           <Route path="/verifyemail" element={<VerifyEmail />} />
@@ -50,6 +53,7 @@ function App() {
           <Route path="/patient/prescriptions" element={<Prescriptions />} />
           <Route path="/patient/messages" element={<Chat />} />
           <Route path="/patient/profile" element={<PatientProfile />} />
+          <Route path="/patient/contact" element={<ContactUs />} />
           <Route path="/doctor-profile/:id" element={<PublicDoctorProfile />} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/doctor/schedule" element={<DoctorSchedule />} />
@@ -67,6 +71,17 @@ function App() {
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/coupons" element={<AdminCoupons />} />
+          <Route path="/admin/messages-contact" element={<AdminMessages />} />
+          
+          {/* Fallback for generic /dashboard */}
+          <Route path="/dashboard" element={<Navigate to={
+            (() => {
+              const user = JSON.parse(localStorage.getItem('user') || '{}');
+              if (user.role === 'Admin') return "/admin/dashboard";
+              if (user.role === 'Doctor') return "/doctor/dashboard";
+              return "/patient/dashboard";
+            })()
+          } replace />} />
         </Routes>
     </div>
   );

@@ -76,6 +76,10 @@ async function login(req, res) {
       return res.status(401).json({ message: "Incorrect password" });
     }
 
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Your account is blocked. Please contact admin." });
+    }
+
     const token = generateToken(user);
 
     return res.status(200).json({
@@ -245,11 +249,14 @@ async function me(req, res) {
 
 async function googleCallback(req, res) {
   try {
+    const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
+
+    if (req.user.isActive === false) {
+      return res.redirect(`${frontendURL}/login?error=blocked`);
+    }
+
     const token = generateToken(req.user);
     // Redirect to frontend with token
-    // Adjust logic to match where you want to land (e.g. dashboard or a specific auth-success page)
-    // For now, redirecting to a route that handles the token on frontend
-    const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendURL}/auth/success?token=${token}`);
   } catch (e) {
     console.log(e);

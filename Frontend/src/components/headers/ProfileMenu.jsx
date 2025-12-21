@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfileMenu({avtar}) {
   let name = avtar || "U";
   const [menu, setMenu] = useState(false);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = user.role;
 
   // Close on outside click
   useEffect(() => {
@@ -15,6 +20,12 @@ export default function ProfileMenu({avtar}) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   return (
     <div ref={menuRef} className="relative">
@@ -29,12 +40,15 @@ export default function ProfileMenu({avtar}) {
 
       {/* Dropdown */}
       {menu && (
-        <div className="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border overflow-hidden animate-fade-in">
-          <MenuItem text="Prescriptions" />
-          <MenuItem text="View History" />
-          <MenuItem text="Change Password" />
+        <div className="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border overflow-hidden animate-fade-in z-50">
+          {role === 'Admin' && (
+             <MenuItem text="Admin Panel" onClick={() => navigate('/admin/dashboard')} />
+          )}
+          <MenuItem text="Prescriptions" onClick={() => navigate('/patient/prescriptions')} />
+          <MenuItem text="View History" onClick={() => navigate('/patient/appointments')} />
+          {/* <MenuItem text="Change Password" /> */}
           <div className="border-t">
-            <MenuItem text="Logout" danger />
+            <MenuItem text="Logout" danger onClick={handleLogout} />
           </div>
         </div>
       )}
@@ -42,9 +56,10 @@ export default function ProfileMenu({avtar}) {
   );
 }
 
-function MenuItem({ text, danger }) {
+function MenuItem({ text, danger, onClick }) {
   return (
     <div
+      onClick={onClick}
       className={`px-4 py-2 text-sm cursor-pointer transition
       ${danger 
         ? "text-red-600 hover:bg-red-50" 

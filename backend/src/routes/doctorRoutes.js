@@ -19,6 +19,9 @@ router.get("/profile/status", authMiddleware, doctorRoleMiddleware, checkProfile
 
 router.post("/profile", authMiddleware, doctorRoleMiddleware, createOrUpdateDoctorProfile);
 
+// 📌 UPDATE SCHEDULE
+router.put("/schedule", authMiddleware, doctorRoleMiddleware, updateDoctorSchedule);
+
 router.get("/profile", authMiddleware, getDoctorProfile);
 router.get("/profile/:id", getDoctorPublicProfile); // Public profile access
 // router.put("/profile", authMiddleware, updateDoctorProfile); // Removed as createOrUpdate handles this

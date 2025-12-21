@@ -67,6 +67,7 @@ const Sidebar = () => {
     { name: 'Find Doctor', path: '/patient/find-doctors', icon: '/Doctor.png', color: 'bg-indigo-500' },
     { name: 'Messages', path: '/patient/messages', icon: '/Chat.png', color: 'bg-pink-500' },
     { name: 'Profile', path: '/patient/profile', icon: '/Profile.png', color: 'bg-orange-500' },
+    { name: 'Contact Us', path: '/patient/contact', color: 'bg-teal-500' },
   ];
 
   const doctorLinks = [
