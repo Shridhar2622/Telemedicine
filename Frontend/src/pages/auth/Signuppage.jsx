@@ -4,6 +4,7 @@ import CardSwap, { Card } from "../../components/ui/CardSwap"
 import doctor1 from "../../assets/doctor1.jpg";
 import doctor2 from "../../assets/doctor2.jpg";
 import doctor3 from "../../assets/doctor3.jpg";
+import PublicNavbar from "../../components/PublicNavbar";
 import "./LoginPage.css";
 
 
@@ -97,7 +98,10 @@ function Signuppage() {
   };
 
   return (
-    <div className="login-container">
+    <div className="login-container relative">
+      <div className="absolute top-0 w-full z-50">
+        <PublicNavbar />
+      </div>
       {/* LEFT POSTER SECTION */}
       <div className="login-showcase">
         <div className="showcase-content floating">
@@ -121,8 +125,8 @@ function Signuppage() {
       </div>
 
       {/* RIGHT FORM SECTION */}
-      <div className="login-form-section">
-        <div className="login-form-container">
+      <div className="login-form-section pt-24 md:pt-0">
+        <div className="login-form-container mt-20 md:mt-0">
           
           {/* Header */}
           <div className="login-header">
@@ -223,6 +227,28 @@ function Signuppage() {
                 ⚠️ {backendError}
               </div>
             )}
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            {/* Social Login */}
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={() => window.location.href = "http://localhost:5000/api/auth/google"}
+                className="w-full flex justify-center items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+              >
+                <img className="h-5 w-5" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />
+                Sign in with Google
+              </button>
+            </div>
           </form>
         </div>
       </div>

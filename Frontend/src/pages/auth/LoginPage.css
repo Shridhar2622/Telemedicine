@@ -42,7 +42,7 @@
 .login-form-section {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Changed from center to fix cutoff */
   justify-content: center;
   background: #ffffff;
   position: relative;

@@ -26,17 +26,59 @@ const DoctorSchedule = () => {
             const newSchedule = [...prev];
             const existingDayIndex = newSchedule.findIndex(d => d.day === dayName);
 
+            // Default to 30 mins: 09:00 - 09:30
+            const defaultSlot = { startTime: '09:00', endTime: '09:30' };
+
             if (existingDayIndex >= 0) {
-                // Create a copy of the day object and slots array
                 const updatedDay = {
                     ...newSchedule[existingDayIndex],
-                    slots: [...newSchedule[existingDayIndex].slots, { startTime: '09:00', endTime: '17:00' }]
+                    slots: [...newSchedule[existingDayIndex].slots, defaultSlot]
                 };
                 newSchedule[existingDayIndex] = updatedDay;
                 return newSchedule;
             } else {
-                // Add new day with one slot
-                return [...newSchedule, { day: dayName, slots: [{ startTime: '09:00', endTime: '17:00' }] }];
+                return [...newSchedule, { day: dayName, slots: [defaultSlot] }];
+            }
+        });
+    };
+
+    const generateTimeSlots = (startStr, endStr, intervalMins) => {
+        const slots = [];
+        let current = new Date(`2000-01-01T${startStr}`);
+        const end = new Date(`2000-01-01T${endStr}`);
+
+        while (current < end) {
+            const startTime = current.toTimeString().slice(0, 5);
+            current.setMinutes(current.getMinutes() + intervalMins);
+            const endTime = current.toTimeString().slice(0, 5);
+            
+            if (current <= end) {
+                slots.push({ startTime, endTime });
+            }
+        }
+        return slots;
+    };
+
+    const handleAutoGenerate = (dayIndex) => {
+        const dayName = daysOfWeek[dayIndex];
+        // Confirm before overwriting if slots exist?
+        // simple version: just overwrite or append? The user typical workflow for "Auto Generate" implies filling empty or resetting.
+        // Let's replace.
+        
+        const newSlots = generateTimeSlots('09:00', '17:00', 30);
+
+        setSchedule(prev => {
+            const newSchedule = [...prev];
+            const existingDayIndex = newSchedule.findIndex(d => d.day === dayName);
+
+            if (existingDayIndex >= 0) {
+                newSchedule[existingDayIndex] = {
+                    ...newSchedule[existingDayIndex],
+                    slots: newSlots
+                };
+                return newSchedule;
+            } else {
+                return [...newSchedule, { day: dayName, slots: newSlots }];
             }
         });
     };
@@ -73,9 +115,18 @@ const DoctorSchedule = () => {
             // Filter out any days that accidentally have 0 slots before saving
             const validSchedule = schedule.filter(day => day.slots && day.slots.length > 0);
 
+            // Sanitize: Remove _ids to prevent Mongoose duplicate key errors on subdocs
+            const sanitizedSchedule = validSchedule.map(day => ({
+                day: day.day,
+                slots: day.slots.map(slot => ({
+                    startTime: slot.startTime,
+                    endTime: slot.endTime
+                }))
+            }));
+
             // Send only valid schedule as payload
             const payload = {
-                availableTimes: validSchedule
+                availableTimes: sanitizedSchedule
             };
 
             await api.put('/doctor/schedule', payload);
@@ -122,8 +173,15 @@ const DoctorSchedule = () => {
                                         <div className="flex justify-between items-center mb-4">
                                             <h3 className="font-bold text-slate-800 text-lg">{day}</h3>
                                             <button 
+                                                onClick={() => handleAutoGenerate(index)}
+                                                className="text-sm bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-1 rounded-md transition-colors font-medium mr-3"
+                                                title="Generate 30 min slots from 9AM to 5PM"
+                                            >
+                                                ⚡ Auto 9-5
+                                            </button>
+                                            <button 
                                                 onClick={() => handleAddSlot(index)}
-                                                className="text-sm text-primary hover:bg-primary/10 px-3 py-1 rounded-md transition-colors font-medium"
+                                                className="text-sm border border-primary text-primary hover:bg-primary/5 px-3 py-1 rounded-md transition-colors font-medium"
                                             >
                                                 + Add Slot
                                             </button>

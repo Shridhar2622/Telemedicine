@@ -14,7 +14,6 @@ const AdminSidebar = () => {
     const navItems = [
         { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { path: '/admin/users', label: 'Users', icon: Users },
-        { path: '/admin/doctors', label: 'Doctors', icon: UserPlus },
         { path: '/admin/coupons', label: 'Coupons', icon: Ticket },
         { path: '/admin/messages-contact', label: 'Messages', icon: Mail },
     ];

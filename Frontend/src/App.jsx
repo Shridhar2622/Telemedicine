@@ -40,6 +40,7 @@ function App() {
       
         <Routes>
           <Route path="/" element={<PatientPage />} />
+          <Route path="/contact" element={<ContactUs />} />
           <Route path="/signup" element={<Signuppage />} />
           <Route path="/login" element={<Loginpage />} />
           <Route path="/verifyemail" element={<VerifyEmail />} />
@@ -71,6 +72,16 @@ function App() {
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/coupons" element={<AdminCoupons />} />
           <Route path="/admin/messages-contact" element={<AdminMessages />} />
+          
+          {/* Fallback for generic /dashboard */}
+          <Route path="/dashboard" element={<Navigate to={
+            (() => {
+              const user = JSON.parse(localStorage.getItem('user') || '{}');
+              if (user.role === 'Admin') return "/admin/dashboard";
+              if (user.role === 'Doctor') return "/doctor/dashboard";
+              return "/patient/dashboard";
+            })()
+          } replace />} />
         </Routes>
     </div>
   );

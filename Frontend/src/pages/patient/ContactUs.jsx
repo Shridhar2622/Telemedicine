@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import MainLayout from '../../layouts/MainLayout';
-import Card from '../../components/ui/Card';
+import PublicNavbar from '../../components/PublicNavbar';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 
 const ContactUs = () => {
   return (
-    <MainLayout>
-      <div className="space-y-6 animate-fade-in">
+    <div className="min-h-screen bg-blue-50">
+      <PublicNavbar />
+      <div className="p-8 max-w-7xl mx-auto animate-fade-in mt-10">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
           Contact Support
         </h1>
@@ -69,7 +69,7 @@ const ContactUs = () => {
             </div>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 };
 

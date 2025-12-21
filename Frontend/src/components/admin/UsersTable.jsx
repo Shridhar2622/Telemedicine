@@ -32,7 +32,7 @@ const UsersTable = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/admin/toggle-block', 
+            await axios.post('http://localhost:5000/api/admin/user/toggle-block', 
                 { userId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
