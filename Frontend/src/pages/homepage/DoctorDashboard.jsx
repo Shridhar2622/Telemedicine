@@ -96,7 +96,7 @@ const DoctorDashboard = () => {
                     />
                     <StatCard 
                         label="Total Earnings" 
-                        value="$4,250" 
+                        value="₹4,250" 
                         color="bg-green-100 text-green-600"
                         icon="💰"
                         trend="Estimated"

@@ -151,7 +151,7 @@ function Loginpage() {
       </div>
 
       {/* RIGHT FORM SECTION */}
-      <div className="login-form-section pt-24 md:pt-0"> {/* Mobile padding */}
+      <div className="login-form-section pt-24 md:pt-28"> {/* Mobile padding */}
         <div className="login-form-container mt-20 md:mt-0"> {/* Extra margin for safety */}
 
           {/* Header */}

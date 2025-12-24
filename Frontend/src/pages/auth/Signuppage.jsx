@@ -127,7 +127,7 @@ function Signuppage() {
       </div>
 
       {/* RIGHT FORM SECTION */}
-      <div className="login-form-section pt-24 md:pt-0">
+      <div className="login-form-section pt-24 md:pt-28">
         <div className="login-form-container mt-20 md:mt-0">
           
           {/* Header */}

@@ -24,7 +24,7 @@ const createAdmin = async () => {
     });
 
     await admin.save();
-    console.log("Admin created successfully");
+    console.log("Admin created successfully you can see");
     console.log("Email: admin@telemedicine.com");
     console.log("Password: adminpassword123");
     process.exit();
