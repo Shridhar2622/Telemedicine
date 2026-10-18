@@ -131,8 +131,17 @@ async function verifyEmail(req, res) {
         `<p>Your OTP is <b>${OTP}</b>. It is valid for 5 minutes.</p>`
       );
     } catch (e) {
-      console.log(`Failed to send email (SMTP error). OTP for ${email} is: ${OTP}`);
-      return res.status(200).json({ message: "OTP logged in server console (SMTP failed)" });
+      console.error(`Failed to send verification email to ${email}:`, e.message || e);
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[DEV MODE] OTP for ${email} is: ${OTP}`);
+        return res.status(200).json({
+          message: "OTP sent (Logged in local console)",
+          devOtp: OTP
+        });
+      }
+      return res.status(500).json({
+        message: "Failed to send verification email. Please check server email service configuration."
+      });
     }
 
     return res.status(200).json({ message: "OTP sent to your email" });
@@ -168,9 +177,19 @@ async function verifyOTP(req, res) {
     user.emailVerificationExpires = null;
     await user.save();
 
-    await sendEmail(email, "Verification Status", `<p>Your email is verified.</p>`);
+    const token = generateToken(user);
 
-    return res.status(200).json({ message: "Email verified successfully" });
+    return res.status(200).json({
+      message: "Email verified successfully",
+      token,
+      user: {
+        id: user._id,
+        userName: user.userName,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
 
   } catch (e) {
     console.log(e);
@@ -197,8 +216,17 @@ async function forgetPassword(req, res) {
     try {
       await sendEmail(email, "Reset Password OTP", `<h3>Your OTP: ${OTP}</h3>`);
     } catch (e) {
-      console.log(`Failed to send email (SMTP error). OTP for ${email} is: ${OTP}`);
-      return res.status(200).json({ message: "OTP logged in server console (SMTP failed)" });
+      console.error(`Failed to send reset password email to ${email}:`, e.message || e);
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[DEV MODE] OTP for ${email} is: ${OTP}`);
+        return res.status(200).json({
+          message: "OTP sent (Logged in local console)",
+          devOtp: OTP
+        });
+      }
+      return res.status(500).json({
+        message: "Failed to send reset password email. Please check server email service configuration."
+      });
     }
 
     return res.status(200).json({ message: "OTP sent to your email" });

@@ -1,20 +1,28 @@
+const path = require("path");
 require("dotenv").config({
-    path: "../../.env"
+  path: path.resolve(__dirname, "../../.env")
 });
 const sendEmail = require("./emailService");
 
-console.log(process.env.SMTP_EMAIL)
+console.log("Configured email:", process.env.SMTP_EMAIL || process.env.BREVO_SENDER_EMAIL || "None");
+console.log("Active service provider:", 
+  process.env.BREVO_API_KEY ? "Brevo (HTTP API)" : 
+  process.env.RESEND_API_KEY ? "Resend (HTTP API)" : 
+  process.env.SMTP_EMAIL ? "Nodemailer (SMTP)" : "None"
+);
 
 async function test() {
   try {
-    await sendEmail(
-      "213021222.shridhar@gmail.com",
-      "Testing Transporter",
-      "<h1>Your transporter works 🔥</h1>"
+    const testRecipient = process.env.SMTP_EMAIL || "test@example.com";
+    console.log(`Sending test email to ${testRecipient}...`);
+    const result = await sendEmail(
+      testRecipient,
+      "Telemedicine Test Email",
+      "<h1>Your email service is working perfectly! 🔥</h1><p>Sent from Telemedicine Platform.</p>"
     );
-    console.log("Mail sent!");
+    console.log("✅ Email sent successfully! Result:", result);
   } catch (err) {
-    console.log("Mail failed:", err);
+    console.error("❌ Email sending failed:", err.message);
   }
 }
 

@@ -53,9 +53,12 @@ app.use(
   })
 );
 
-// Authentication Config
-const passport = require("./config/passport");
-app.use(passport.initialize());
+// Authentication Config (Google OAuth - Optional)
+const { passport, isGoogleAuthEnabled } = require("./config/passport");
+if (isGoogleAuthEnabled) {
+  app.use(passport.initialize());
+}
+
 
 
 const authRoute = require("./routes/authRoutes");

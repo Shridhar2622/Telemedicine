@@ -18,24 +18,33 @@ route.post("/forgotPassword/verifyOTP", verifyForgotPasswordOtp);
 // Get Current User
 route.get("/me", authMiddleware, me);
 
-// Google Auth
-const passport = require("passport");
+// Google Auth (Optional - Disabled by default)
+const { passport, isGoogleAuthEnabled } = require("../config/passport");
 const { googleCallback } = require('../controllers/authController');
 
-route.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-route.get(
-  "/google/callback",
-  (req, res, next) => {
+if (isGoogleAuthEnabled) {
+  route.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+  route.get(
+    "/google/callback",
+    (req, res, next) => {
+      const rawFrontend = process.env.FRONTEND_URL || "http://localhost:5173";
+      const frontendURL = rawFrontend.replace(/\/+$/, "");
+      passport.authenticate("google", {
+        session: false,
+        failureRedirect: `${frontendURL}/login?error=auth_failed`
+      })(req, res, next);
+    },
+    googleCallback
+  );
+} else {
+  route.get("/google", (req, res) => {
+    res.status(503).json({ message: "Google OAuth is currently disabled." });
+  });
+  route.get("/google/callback", (req, res) => {
     const rawFrontend = process.env.FRONTEND_URL || "http://localhost:5173";
     const frontendURL = rawFrontend.replace(/\/+$/, "");
-    passport.authenticate("google", {
-      session: false,
-      failureRedirect: `${frontendURL}/login?error=auth_failed`
-    })(req, res, next);
-  },
-  googleCallback
-);
+    res.redirect(`${frontendURL}/login?error=oauth_disabled`);
+  });
+}
 
-
-
-module.exports=route
+module.exports = route;
