@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import Button from "../../components/Button";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { API_BASE_URL } from "../../config";
+import { API_BASE_URL, ENABLE_GOOGLE_AUTH } from "../../config";
+
 import { useNavigate } from "react-router-dom";
 import CardSwap, { Card } from "../../components/ui/CardSwap"
 import doctor1 from "../../assets/doctor1.jpg";
@@ -248,28 +249,33 @@ function Loginpage() {
               </div>
             )}
 
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
+            {/* Social Login (Optional - Disabled when ENABLE_GOOGLE_AUTH is false) */}
+            {ENABLE_GOOGLE_AUTH && (
+              <>
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                  </div>
+                </div>
 
-            {/* Social Login */}
-            <div className="mt-6">
-              <button
-                type="button"
-                onClick={() => window.location.href = `${API_BASE_URL}/auth/google`}
-                className="w-full flex justify-center items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
-              >
-                <img className="h-5 w-5" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />
-                Sign in with Google
-              </button>
-            </div>
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={() => window.location.href = `${API_BASE_URL}/auth/google`}
+                    className="w-full flex justify-center items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                  >
+                    <img className="h-5 w-5" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />
+                    Sign in with Google
+                  </button>
+                </div>
+              </>
+            )}
           </form>
+
         </div>
       </div>
     </div>

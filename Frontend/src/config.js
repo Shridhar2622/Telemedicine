@@ -16,5 +16,9 @@ const API_BASE_URL = rawApi.endsWith('/api') ? rawApi : `${rawApi}/api`;
 // Derive SOCKET_URL by removing '/api'
 const SOCKET_URL = API_BASE_URL.replace(/\/api$/, '');
 
-export { API_BASE_URL, SOCKET_URL };
+// Google OAuth feature toggle (false by default)
+const ENABLE_GOOGLE_AUTH = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
+
+export { API_BASE_URL, SOCKET_URL, ENABLE_GOOGLE_AUTH };
+
 
